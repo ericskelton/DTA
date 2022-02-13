@@ -10,7 +10,7 @@ def getQuote(ticker):
         except socket.error as err:
             print('Error connecting to server: {}'.format(err))
         print(sock)
-        sock.sendall(ticker.encode())
+        sock.sendall(ticker.encode() + b'\n')
         data = sock.recv(1024)
     print('Received', repr(data))
 
