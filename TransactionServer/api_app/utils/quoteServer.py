@@ -8,3 +8,11 @@ def getQuote(ticker):
         sock.sendall(ticker.encode())
         data = sock.recv(1024)
     print('Received', repr(data))
+
+def main():
+    getQuote('AAPL')
+    getQuote('GOOG')
+    getQuote('MSFT')
+
+if __name__ == '__main__':
+    main()
