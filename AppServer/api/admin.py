@@ -1,4 +1,4 @@
-from django.contrib import admin
-from .models import Detectives
+# from django.contrib import admin
+# from .models import Stock
 # Register your models here.
-admin.site.register(Detectives)
+# admin.site.register(Stock)

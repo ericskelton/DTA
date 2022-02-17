@@ -1,12 +1,15 @@
-from django.urls import include, path
-from rest_framework import routers
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from . import views
 
-router = routers.DefaultRouter()
-router.register(r'detectives',views.DetectoveViewSet)
+# Create a router and register our viewsets with it.
+router = DefaultRouter()
+router.register(r'snippets', views.SnippetViewSet)
+router.register(r'users', views.CustomUserViewSet)
+# router.register(r'add', views.ADDViewSet)
 
+# The API URLs are now determined automatically by the router.
 urlpatterns = [
     path('', include(router.urls)),
-    path('api-auth/',
-    include('rest_framework.urls',namespace='rest_framework'))
+    path('add/', views.add)
 ]
