@@ -6,6 +6,10 @@ name = "pypi"
 [packages]
 django = "*"
 djangorestframework = "*"
+pymongo = "*"
+dnspython = "*"
+django-environ = "*"
+django-cors-headers = "*"
 
 [dev-packages]
 
