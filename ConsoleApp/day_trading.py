@@ -104,7 +104,7 @@ def set_buy_trigger():
 
 def set_sell_amount():
 
-    print("set_sell_amount")
+    print("SET SELL DETECTED")
 
 def set_sell_trigger():
 
