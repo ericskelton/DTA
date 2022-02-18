@@ -59,6 +59,7 @@ def createNewUser(request):
         body = request.POST
 
         if(createUser(body['name'], body['email'], body['password'])):
+            # TODO: log the user in when the account is created
             return HttpResponse("User created")
         else:
             return HttpResponse("User already exists")

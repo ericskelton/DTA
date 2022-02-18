@@ -1,0 +1,25 @@
+version: '3.4'
+services:
+  nginx:
+    build:
+      context : ./nginx/
+      dockerfile: Nginx.Dockerfile
+    depends_on:
+      - api
+      - redis
+    ports:
+      - "5100:5100"
+    restart: always
+  api:
+    build: .
+    environment:
+      NODE_ENV: production
+    restart: always
+  redis:
+    build:
+      context: ./redis/
+      dockerfile: redis.Dockerfile
+    restart: always
+    ports:
+      - "6379:6379"
+  
