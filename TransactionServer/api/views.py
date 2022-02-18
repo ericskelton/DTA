@@ -1,18 +1,30 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from api.utils.quoteServer import quoteServer
+from api.utils.quoteServer import getQuote
+from api.utils.user import *
+
+
 
 # Create your views here.
 
 def quote (request):
     if(request.method == 'GET'):
-        print(request.GET['ticker'])
-        return HttpResponse(quoteServer.getQuote(request.GET['ticker']))
+        return HttpResponse(getQuote(request.GET['ticker']))
     else:
         return HttpResponse("Invalid request")
 
 def add(request):
-    pass
+    if(request.method == 'POST'):
+        body = request.POST
+        # TODO: userId needs to be real (authenticated and shit)
+        userId = body['user']
+        amount = body['amount']
+        return HttpResponse(addBalance(userId, amount))
+        
+
+                 
+    else:
+        return HttpResponse("Invalid request")
 def buy(request):
     pass
 def commit_buy(request):
@@ -41,3 +53,16 @@ def dumplog(request):
     pass
 def display_summary(request):  
     pass
+
+def createNewUser(request):
+    if(request.method == 'POST'):
+        body = request.POST
+
+        if(createUser(body['name'], body['email'], body['password'])):
+            return HttpResponse("User created")
+        else:
+            return HttpResponse("User already exists")
+    else:
+        return HttpResponse("Invalid request")
+
+        
