@@ -2,6 +2,7 @@
 from api.utils.db import getDb
 import time
 from api.utils.quoteServer import getQuote
+from hashlib import sha256
 
 db, client = getDb('dta')
 
@@ -37,7 +38,7 @@ def createUser(name, email, password):
     return db.user.insert_one({
         'name': name,
         'email': email,
-        # 'password': password, # TODO: hash password
+        'password': sha256(password.encode('utf-8')).hexdigest(),
         'balance': 0.00, 
         'transactions': [], 
         'stocks': [],
@@ -46,8 +47,7 @@ def createUser(name, email, password):
         })
 
 def login(email, password):
-    # TODO: hash password
-    user = db.user.find_one({'email': email, 'password': password})
+    user = db.user.find_one({'email': email, 'password': sha256(password.encode('utf-8')).hexdigest()})
 
     if(user):
         # TODO: generate token, save against user somehow, return token
