@@ -4,7 +4,7 @@ import time
 from api.utils.quoteServer import getQuote
 from hashlib import sha256
 
-db, client = getDb('dta')
+db, client = getDb()
 
 def getBalance(id):
     return db.user.find_one({'_id': id}, {'balance': 1})
