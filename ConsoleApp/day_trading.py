@@ -1,5 +1,5 @@
 import sys
-import argparse
+import requests
 
 def main():
 
@@ -18,110 +18,184 @@ def main():
     for element in range(len(lines_formatted)): #Finding all commands and sending them to their correct function
         lines_formatted[element][0] = lines_formatted[element][0].split(" ")
         if ("ADD" == lines_formatted[element][0][1]):
-            add(userID, lines_formatted[element][2])
+
+            add(lines_formatted[element][1], lines_formatted[element][2])
+
         if ("QUOTE" == lines_formatted[element][0][1]):
-            quote()
+
+            quote(lines_formatted[element][1], lines_formatted[element][2])
+
         if ("BUY" == lines_formatted[element][0][1]):
-            buy()
+
+            buy(lines_formatted[element][1],lines_formatted[element][2],lines_formatted[element][3])
+
         if ("COMMIT_BUY" == lines_formatted[element][0][1]):
-            commit_buy()
+
+            commit_buy(lines_formatted[element][1])
+
         if ("CANCEL_BUY" == lines_formatted[element][0][1]):
-            cancel_buy()
+
+            cancel_buy(lines_formatted[element][1])
+
         if ("SELL" == lines_formatted[element][0][1]):
-            sell()
+
+            sell(lines_formatted[element][1],lines_formatted[element][2],lines_formatted[element][3])
+
         if ("COMMIT_SELL" == lines_formatted[element][0][1]):
-            commit_sell()
+
+            commit_sell(lines_formatted[element][1])
+
         if ("CANCEL_SELL" == lines_formatted[element][0][1]):
-            cancel_sell()
+
+            cancel_sell(lines_formatted[element][1])
+
         if ("SET_BUY_AMOUNT" == lines_formatted[element][0][1]):
-            set_buy_amount()
+
+            set_buy_amount(lines_formatted[element][1],lines_formatted[element][2],lines_formatted[element][3])
+
         if ("CANCEL_SET_BUY" == lines_formatted[element][0][1]):
-            cancel_set_buy()
+
+            cancel_set_buy(lines_formatted[element][1],lines_formatted[element][2])
+
         if ("SET_BUY_TRIGGER" == lines_formatted[element][0][1]):
-            set_buy_trigger()
+
+            set_buy_trigger(lines_formatted[element][1],lines_formatted[element][2],lines_formatted[element][3])
+
         if ("SET_SELL_AMOUNT" == lines_formatted[element][0][1]):
-            set_sell_amount()
+
+            set_sell_amount(lines_formatted[element][1],lines_formatted[element][2],lines_formatted[element][3])
+
         if ("SET_SELL_TRIGGER" == lines_formatted[element][0][1]):
-            set_sell_trigger()
+
+            set_sell_trigger(lines_formatted[element][1],lines_formatted[element][2],lines_formatted[element][3])
+
         if ("CANCEL_SET_SELL" == lines_formatted[element][0][1]):
-            cancel_set_sell()
+
+            cancel_set_sell(lines_formatted[element][1],lines_formatted[element][2])
+
         if ("DUMPLOG" == lines_formatted[element][0][1]):
-            dumplog()
+
+            dumplog(lines_formatted[element][1])
+
         if ("DISPLAY_SUMMARY" == lines_formatted[element][0][1]):
-            display_summary()            
+
+            display_summary(lines_formatted[element][1])            
             
 # ADD Function - All functionality related to adding funds to a user's account
 
 def add(userid, amount):
 
-    print("ADD DETECTED")
+    endpoint = "API-URL/add"
+    payload = {"user_id" : userid, "amount" : amount}
 
-# QUOTE Function - 
+    r = requests.post(url=endpoint, data=payload)
 
-def quote():
+def quote(userid, symbol):
 
-    print("QUOTE DETECTED")
+    endpoint = "API-URL/quote"
+    parameters = {"symbol": symbol}    
 
-def buy():
+    r = requests.get(url = endpoint, params=parameters)
 
-    print("BUY DETECTED")
+def buy(userid, symbol, amount):
 
-def commit_buy():
+    endpoint = "API-URL/buy"
+    payload = {"user_id" : userid, "symbol" : symbol, "amount" : amount}
 
-    print("COMMIT BUY DETECTED")
+    r = requests.post(url=endpoint, data=payload)
+    
+def commit_buy(userid):
 
-def cancel_buy():
+    endpoint = "API-URL/commit-buy"
+    payload = {"user_id" : userid}
 
-    print("CANCEL BUY DETECTED")
+    r = requests.post(url=endpoint, data=payload)
 
-def sell():
+def cancel_buy(userid):
 
-    print("SELL DETECTED")
+    endpoint = "API-URL/cancel-buy"
+    payload = {"user_id" : userid}
 
-def commit_sell():
+    r = requests.post(url=endpoint, data=payload)
 
-    print("COMMIT SELL")
+def sell(userid, symbol, amount):
 
-def cancel_sell():
+    endpoint = "API-URL/sell"
+    payload = {"user_id" : userid, "symbol" : symbol, "amount" : amount}
 
-    print("CANCEL SELL DETECTED")
+    r = requests.post(url=endpoint, data=payload)
 
-def set_buy_amount():
+def commit_sell(userid):
 
-    print("SET BUY DETECTED")
+    endpoint = "API-URL/commit-sell"
+    payload = {"user_id" : userid}
 
-def cancel_sell():
+    r = requests.post(url=endpoint, data=payload)
 
-    print("CANCEL SELL DETECTED")
+def cancel_sell(userid):
 
-def cancel_set_buy():
+    endpoint = "API-URL/cancel-sell"
+    payload = {"user_id" : userid}
 
-    print("CANCEL SET BUY DETECTED")
+    r = requests.post(url=endpoint, data=payload)
 
-def set_buy_trigger():
+def set_buy_amount(userid,symbol,amount):
 
-    print("SET BUY TRIGGER DETECTED")
+    endpoint = "API-URL/set-buy-amount"
+    payload = {"user_id" : userid, "symbol" : symbol, "amount" : amount}
 
-def set_sell_amount():
+    r = requests.post(url=endpoint, data=payload)
 
-    print("SET SELL DETECTED")
+def cancel_set_buy(userid, symbol):
 
-def set_sell_trigger():
+    endpoint = "API-URL/cancel-set-buy"
+    payload = {"user_id" : userid, "symbol" : symbol}
 
-    print("SET SELL TRIGGER DETECTED")
+    r = requests.post(url=endpoint, data=payload)
 
-def cancel_set_sell():
+def set_buy_trigger(userid,symbol,amount):
 
-    print("CANCEL SET SELL DETECTED")
+    endpoint = "API-URL/set-buy-trigger"
+    payload = {"user_id" : userid, "symbol" : symbol, "amount" : amount}
 
-def dumplog():
+    r = requests.post(url=endpoint, data=payload)
 
-    print("DUMPLOG DETECTED")
+def set_sell_amount(userid,symbol,amount):
 
-def display_summary():
+    endpoint = "API-URL/set-sell-amount"
+    payload = {"user_id" : userid, "symbol" : symbol, "amount" : amount}
 
-    print("DISPLAY SUMMARY DETECTED")
+    r = requests.post(url=endpoint, data=payload)
 
+def set_sell_trigger(userid,symbol,amount):
+
+    endpoint = "API-URL/set-sell-trigger"
+    payload = {"user_id" : userid, "symbol" : symbol, "amount" : amount}
+
+    r = requests.post(url=endpoint, data=payload)
+
+def cancel_set_sell(userid, symbol):
+
+    endpoint = "API-URL/cancel-set-sell"
+    payload = {"user_id" : userid, "symbol" : symbol}
+
+    r = requests.post(url=endpoint, data=payload)
+
+def dumplog(filename):
+
+    endpoint = "API-URL/dumplog"  
+
+    r = requests.get(url = endpoint)
+
+    f = open(filename,"w+")
+    f.write(r)
+
+def display_summary(userid):
+
+    endpoint = "API-URL/display-summary"
+    r = requests.get(url = endpoint, params=userid)
+
+    
 
 
 
