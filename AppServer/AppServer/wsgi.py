@@ -1,5 +1,5 @@
 """
-WSGI config for DayTradingApp project.
+WSGI config for AppServer project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -8,9 +8,10 @@ https://docs.djangoproject.com/en/3.2/howto/deployment/wsgi/
 """
 
 import os
+from django.conf import settings
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'DayTradingApp.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'AppServer.settings')
 
 application = get_wsgi_application()
