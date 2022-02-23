@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-
+import django_heroku
 from pathlib import Path
 import environ
 
@@ -142,3 +142,4 @@ REST_FRAMEWORK = {
         'AppServer.apps.authentication.backends.JWTAuthentication',
     ),
 }
+django_heroku.settings(locals())

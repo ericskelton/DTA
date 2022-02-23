@@ -12,6 +12,8 @@ pygments = "*"
 PyJWT = "==1.7.1"
 requests = "*"
 django-environ = "*"
+gunicorn = "*"
+django-heroku = "*"
 
 [requires]
 python_version = "3.9"
