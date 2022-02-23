@@ -3,67 +3,80 @@ from api.utils.db import getDb
 import time
 from api.utils.quoteServer import getQuote
 from hashlib import sha256
+from pymongo.bson.objectid import ObjectId
+from api.utils.db import dbCallWrapper
 
 db, client = getDb()
 
 def getBalance(id):
-    return db.user.find_one({'_id': id}, {'balance': 1})
+    id = ObjectId(id)
+    return dbCallWrapper({'_id': id}, {'balance': 1}, func = db.user.find_one, eventLog = False)
 
 def addBalance(id, amount):
-    return db.user.update_one({'_id': id}, {'$inc': {'balance': amount}})
+    id = ObjectId(id)
+    return dbCallWrapper({'_id': id}, {'$inc': {'balance': amount}}, func = db.user.update_one, eventLog = True)
 
 def subBalance(id, amount):
-    return db.user.update_one({'_id': id}, {'$inc': {'balance': -amount}})
+    id = ObjectId(id)
+    return dbCallWrapper({'_id': id}, {'$inc': {'balance': -amount}}, func = db.user.update_one, eventLog = True)
 
 def getTransactions(id):
-    return db.user.find_one({'_id': id}, {'transactions': 1})
+    id = ObjectId(id)
+    return dbCallWrapper({'_id': id}, {'transactions': 1}, func = db.user.find_one, eventLog = False)
 
 def getAllTransactions():
-    return db.user.find({}, {'transactions': 1})
+    return dbCallWrapper({}, {'transactions': 1}, func = db.user.find, eventLog = False)
 
 def getUser(id):
-    return db.user.find_one({'_id': id})
+    id = ObjectId(id)
+    return dbCallWrapper({"_id": id}, func = db.user.find_one, eventLog = False)
 
 def addTransaction(id, transaction):
-    return db.user.update_one({'_id': id}, {'$push': {'transactions': transaction}})
+    id = ObjectId(id)
+    return dbCallWrapper({'_id': id}, {'$push': {'transactions': transaction}}, func = db.user.update_one)
 
-def addStock(id, stock, amount):
-    return db.user.update_one({'_id': id}, {'$push': {'stocks': {'stock': stock, 'amount': amount}}})
 
 def createUser(name, email, password):
     # email must be unique
-    if(db.user.find_one({'email': email})):
-        return False
+    if(db.user.find_one({'email': email})): # don't need to wrap this 
+        raise Exception('Email already in use')
 
-    return db.user.insert_one({
+    return dbCallWrapper({
         'name': name,
         'email': email,
         'password': sha256(password.encode('utf-8')).hexdigest(),
         'balance': 0.00, 
         'transactions': [], 
         'stocks': [],
-        'pending_transactions': [],
-        'transaction_triggers': []
-        })
+        'pending_buy':{},
+        'pending_sell':{},
+        'triggers': [],
+        'pending_triggers': []
+        }, func = db.user.insert_one)
 
 def login(email, password):
-    user = db.user.find_one({'email': email, 'password': sha256(password.encode('utf-8')).hexdigest()})
+    user = dbCallWrapper({'email': email, 'password': sha256(password.encode('utf-8')).hexdigest()}, func = db.user.find_one)
 
     if(user):
-        # TODO: generate token, save against user somehow, return token
+        # TODO: generate token, return token
         return user
     else:
         return False
 
 # sets the pending transaction to the pending transaction field on the user
 # fails if the user does not have enough balance
-def buyStock(id, stock, amount, price, timestamp, cryptographicKey):
+def buyStock(id, amount, quote):
+    id = ObjectId(id)
+    price = quote['price']
+    stock = quote['ticker']
+    timestamp = quote['timestamp']
+    cryptographicKey = quote['cryptographicKey']
     user = getUser(id)
     # check if the user has enough balance to buy
     if(user['balance'] >= amount * price):
 
         # set pending transaction
-        db.user.update_one({'_id': id}, {
+        dbCallWrapper({'_id': id}, {
             '$set': {
                 'pending_buy' : {
                     'stock': stock, 
@@ -73,28 +86,26 @@ def buyStock(id, stock, amount, price, timestamp, cryptographicKey):
                     'cryptographicKey': cryptographicKey
                 }
             }
-        })
+        }, db.user.update_one)
         return True
-    return False
-    
-# gets the pending transactions for a user
-def getPendingTransaction(id):
-    return db.user.find_one({'_id': id}, {'': 1})
-# removes the pending transaction from the transactions list
+    raise Exception('Insufficient balance')
+
+# removes the pending buy
 # adds the transaction to the transactions list
-# if the any quote is over 2 minutes old, we fail and refresh the quote for each expired quote
+# if the any quote is over 1 minute old, we fail 
 def commitBuy(id):
+    id = ObjectId(id)
     user = getUser(id)
     transaction = user['pending_transaction']
     if(transaction):
         if(time.time() - transaction['timestamp'] > 60):
             # clear the pending transaction
-            db.user.update_one({'_id': id}, {'$set': {'pending_transaction': None}})
-            return False
+            db.user.update_one({'_id': id}, {'$set': {'pending_buy': None}})
+            raise Exception('Quote expired')
         else:
             # buy the stock
             if(transaction['stock'] in user['stocks'].keys()):
-                db.user.update_one({'_id': id}, {
+                dbCallWrapper( {'_id': id}, {
                     '$inc': {
                         'stocks.' + transaction['stock'] + '.amount': transaction['amount'],
                         'balance': -transaction['amount'] * transaction['price']
@@ -105,11 +116,11 @@ def commitBuy(id):
                         },
                         'transactions': transaction
                     },
-                    '$set': {'pending_transaction': None}
-                })
+                    '$set': {'pending_buy': None}
+                }, func = db.user.update_one, eventLog = {'type': 'accountTransaction', 'username': str(id), 'timestamp': int(time.time()), 'action': 'BUY_SHARES', 'stock': transaction['stock'], 'amount': transaction['amount'], 'price': transaction['price'], 'cryptographicKey': transaction['cryptographicKey']})
                 
             else:
-                db.user.update_one({'_id': id}, {
+                dbCallWrapper( {'_id': id}, {
                     '$set': {
                         'stocks.' +transaction['stock']: {
                             'stock': transaction['stock'], 
@@ -120,7 +131,7 @@ def commitBuy(id):
                                 }
                             ]
                         },
-                        'pending_transaction': None
+                        'pending_buy': None
                     },
                     '$push': {
                         'transactions': transaction
@@ -128,23 +139,23 @@ def commitBuy(id):
                     '$inc': {
                         'balance': -transaction['amount'] * transaction['price']
                     }
-                })
+                }, func = db.user.update_one, eventLog = {'type': 'accountTransaction', 'username': str(id), 'timestamp': int(time.time()), 'action': 'BUY_SHARES', 'stock': transaction['stock'], 'amount': transaction['amount'], 'price': transaction['price'], 'cryptographicKey': transaction['cryptographicKey']})
             
             
             
 
             return True
+    raise Exception('No pending transaction')
 
 def sellStock(id, stock, amount, price, timestamp, cryptographicKey):
+    id = ObjectId(id)
     user = getUser(id)
     # check if the user has enough of the stock to sell
     if(stock in user['stocks'].keys() and user['stocks'][stock]['amount'] >= amount):
-        # check if the user has a pending transaction for this stock
-        if user.pending_sell:
-            return False
-        else:
-            # set the transaction to the user's pending transaction
-            db.user.update_one({'_id': id}, {
+       
+        # set the transaction to the user's pending transaction
+        dbCallWrapper(
+            {'_id': id}, {
                 '$set': {
                     'pending_sell': {
                         'stock': stock, 
@@ -154,37 +165,47 @@ def sellStock(id, stock, amount, price, timestamp, cryptographicKey):
                         'cryptographicKey': cryptographicKey
                     }
                 }
-            })
-            return True
-    return False
+            }, 
+            func = db.user.update_one,
+            eventLog = {'type': 'debugEvent', 'username': str(id), 'timestamp': int(time.time()), 'action': 'SELL', 'stock': stock, 'amount': amount, 'price': price, 'cryptographicKey': cryptographicKey}
+        )
+        return True
+    raise Exception('Insufficient stock')
 
 def commitSell(id):
+    id = ObjectId(id)
     user = getUser(id)
     transaction = user['pending_sell']
     if(transaction):
         if(time.time() - transaction['timestamp'] > 60):
             # clear the pending transaction
-            db.user.update_one({'_id': id}, {'$set': {'pending_sell': None}})
-            return False
+            dbCallWrapper({'_id': id}, {'$set': {'pending_sell': None}}, func = db.user.update_one)
+            raise Exception('Quote expired')
         else:
             # sell the stock
             totalAmount = user['stocks'][transaction['stock']]['amount']
 
             if(totalAmount == transaction['amount']):
-                db.user.update_one({'_id': id}, {
-                    '$inc': {
-                        'stocks.' + transaction['stock'] + '.amount': -transaction['amount'],
-                        'balance': transaction['amount'] * transaction['price']
-                    },
-                    '$push':{
-                        'transactions': transaction
-                    },
-                    '$set': {
-                        'pending_sell': None,
-                        'stocks.' + transaction['stock']: None
-                    }})
+                dbCallWrapper(
+                    {'_id': id}, {
+                        '$inc': {
+                            'stocks.' + transaction['stock'] + '.amount': -transaction['amount'],
+                            'balance': transaction['amount'] * transaction['price']
+                        },
+                        '$push':{
+                            'transactions': transaction
+                        },
+                        '$set': {
+                            'pending_sell': None,
+                            'stocks.' + transaction['stock']: None
+                        }
+                    }, 
+                    func = db.user.update_one,
+                    eventLog = {'type': 'accountTransaction', 'username': str(id), 'timestamp': int(time.time()), 'action': 'SELL_SHARES', 'stock': transaction['stock'], 'amount': transaction['amount'], 'price': transaction['price'], 'cryptographicKey': transaction['cryptographicKey']}
+                )
             else:
-                db.user.update_one({'_id': id}, {
+
+                dbCallWrapper({'_id': id}, {
                     '$inc': {
                         'stocks.' + transaction['stock'] + '.amount': -transaction['amount'],
                         'balance': transaction['amount'] * transaction['price']
@@ -198,22 +219,108 @@ def commitSell(id):
                     '$set': {
                         'pending_sell': None
                     }
-                })
+                }, func = db.user.update_one, eventLog = {'type': 'accountTransaction', 'username': str(id), 'timestamp': int(time.time()), 'action': 'SELL_SHARES', 'stock': transaction['stock'], 'amount': transaction['amount'], 'price': transaction['price'], 'cryptographicKey': transaction['cryptographicKey']})
 
             return True
-    return False
+    raise Exception('No pending transaction')
 
 def cancelSell(id):
+    id = ObjectId(id)
     # clear the pending transaction
-    db.user.update_one({'_id': id}, {'$set': {'pending_sell': None}})
-    return True
+    if (getUser(id)['pending_sell']):
+        dbCallWrapper({'_id': id}, {'$set': {'pending_sell': None}}, func = db.user.update_one)
+        return True
+    raise Exception('No pending buy')
 
 def cancelBuy(id):
+    id = ObjectId(id)
     # clear the pending transaction
-    db.user.update_one({'_id': id}, {'$set': {'pending_buy': None}})
-    return True
+    if (getUser(id)['pending_buy']):
+        dbCallWrapper({'_id': id}, {'$set': {'pending_buy': None}}, func = db.user.update_one)
+        return True
+    raise Exception('No pending buy')
 
-def dumplog(id):
-    transactions = db.user.find_one({'_id': id}, {'transactions': 1})
-    return transactions['transactions']
 
+def setBuyAmount(id, stock, amount):
+    id = ObjectId(id)
+    
+    return dbCallWrapper({'_id': id}, {
+        '$set': {
+            'pendingTrigger': {
+                'stock': stock,
+                'amount': amount,
+                'type': 'buy'
+            }
+        }
+    }, func = db.user.update_one)
+
+def setSellAmount(id, stock, amount):
+    id = ObjectId(id)
+
+    return dbCallWrapper({'_id': id}, {
+        '$set': {
+            'pendingTrigger': {
+                'stock': stock,
+                'amount': amount,
+                'type': 'sell'
+            }
+        }
+    }, func = db.user.update_one)
+
+def setBuyTrigger(id, stock, price):
+    id = ObjectId(id)
+    
+    if(getUser(id)['pendingTrigger']['stock'] == stock and getUser(id)['pendingTrigger']['type'] == 'buy'):
+        return dbCallWrapper({'_id': id}, {
+            '$set': {
+                'pending_trigger': None,
+                'triggers': {
+                    stock: {
+                        'amount': getUser(id)['pendingTrigger']['amount'],
+                        'price': price
+                    }
+                }
+            }
+        }, func = db.user.update_one)
+    raise Exception('No pending trigger')
+
+def setSellTrigger(id, stock, price):
+    id = ObjectId(id)
+
+    if(getUser(id)['pendingTrigger']['stock'] == stock and getUser(id)['pendingTrigger']['type'] == 'sell'):
+        return dbCallWrapper({'_id': id}, {
+            '$set': {
+                'pending_trigger': None,
+                'sell_triggers': {
+                    stock: {
+                        'amount': getUser(id)['pendingTrigger']['amount'],
+                        'price': price
+                    }
+                }
+            }
+        }, func = db.user.update_one)
+    raise Exception('No pending trigger')
+def cancelSellTrigger(id, stock):
+    id = ObjectId(id)
+    user = getUser(id)
+    if(user['sell_triggers'][stock] and user['triggers'][stock]['type'] == 'sell'):
+        return db.user.update_one({'_id': id}, {
+            '$set': {
+                'triggers.' + stock: None
+            }
+        })
+    raise Exception('No active sell trigger on specified stock')
+
+def cancelBuyTrigger(id, stock):
+    id = ObjectId(id)
+    user = getUser(id)
+    if(user['buy_triggers'][stock] and user['buy_triggers'][stock]['type'] == 'buy'):
+        return dbCallWrapper({'_id': id}, {
+            '$set': {
+                'triggers.' + stock: None
+            }
+        }, func = db.user.update_one)
+
+def getTriggers():
+
+    return dbCallWrapper({}, {'triggers': 1}, func = db.user.find)
