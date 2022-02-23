@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     'AppServer.apps.core',
     #'AppServer.api',
     'rest_framework',
-    'rest_framework_simplejwt',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
