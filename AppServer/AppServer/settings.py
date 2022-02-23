@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+import environ
+
+env = environ.Env()
+environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,7 +35,9 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'api',
+    'AppServer.apps.authentication',
+    'AppServer.apps.core',
+    #'AppServer.api',
     'rest_framework',
     'rest_framework_simplejwt',
     'django.contrib.admin',
@@ -53,7 +59,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'source.urls'
+ROOT_URLCONF = 'AppServer.urls'
 
 TEMPLATES = [
     {
@@ -71,7 +77,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'source.wsgi.application'
+WSGI_APPLICATION = 'AppServer.wsgi.application'
 
 
 # Database
@@ -128,10 +134,11 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+AUTH_USER_MODEL = 'authentication.User'
 REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
-    
-    
+    'EXCEPTION_HANDLER': 'AppServer.apps.core.exceptions.core_exception_handler',
+    'NON_FIELD_ERRORS_KEY': 'error',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'AppServer.apps.authentication.backends.JWTAuthentication',
+    ),
 }
-AUTH_USER_MODEL = 'api.CustomUser'

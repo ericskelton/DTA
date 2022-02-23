@@ -9,7 +9,9 @@ verify_ssl = true
 django = "*"
 djangorestframework = "*"
 pygments = "*"
-djangorestframework-simplejwt = "*"
+PyJWT = "==1.7.1"
+requests = "*"
+django-environ = "*"
 
 [requires]
 python_version = "3.9"
