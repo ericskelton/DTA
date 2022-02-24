@@ -1,6 +1,7 @@
 import environ
 from utils import get_db_handle, get_db_handle_connection_string
 from pymongo.bson.objectid import ObjectId
+from api.utils.log import logJson
 
 env = environ.Env()
 
@@ -46,7 +47,8 @@ def dbCallWrapper(*args, **kwargs):
     dbfunc = kwargs['func']
 
     queryResults = dbfunc(*args)
-
+    if isinstance(eventLog, dict):
+        logJson(eventLog)
     if queryResults:
         return serializeDbResults(queryResults)
     else:

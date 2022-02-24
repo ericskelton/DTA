@@ -14,11 +14,12 @@ def getBalance(id):
 
 def addBalance(id, amount):
     id = ObjectId(id)
-    return dbCallWrapper({'_id': id}, {'$inc': {'balance': amount}}, func = db.user.update_one, eventLog = True)
+    return dbCallWrapper({'_id': id}, {'$inc': {'balance': amount}}, func = db.user.update_one, eventLog = {'type': 'debugEvent', 'username': str(id), 'timestamp': int(time.time()), 'action': 'ADD_BALANCE', 'amount': amount})
+
 
 def subBalance(id, amount):
     id = ObjectId(id)
-    return dbCallWrapper({'_id': id}, {'$inc': {'balance': -amount}}, func = db.user.update_one, eventLog = True)
+    return dbCallWrapper({'_id': id}, {'$inc': {'balance': -amount}}, func = db.user.update_one, eventLog = False) 
 
 def getTransactions(id):
     id = ObjectId(id)
@@ -86,7 +87,7 @@ def buyStock(id, amount, quote):
                     'cryptographicKey': cryptographicKey
                 }
             }
-        }, db.user.update_one)
+        }, func = db.user.update_one, eventLog = {'type': 'debugEvent', 'username': str(id), timestamp: int(time.time()), 'action': 'BUY', 'stock': stock, 'amount': amount, 'price': price, 'cryptographicKey': cryptographicKey})
         return True
     raise Exception('Insufficient balance')
 
@@ -228,7 +229,7 @@ def cancelSell(id):
     id = ObjectId(id)
     # clear the pending transaction
     if (getUser(id)['pending_sell']):
-        dbCallWrapper({'_id': id}, {'$set': {'pending_sell': None}}, func = db.user.update_one)
+        dbCallWrapper({'_id': id}, {'$set': {'pending_sell': None}}, func = db.user.update_one, eventLog = {'type': 'debugEvent', 'username': str(id), 'timestamp': int(time.time()), 'action': 'CANCEL_SELL'})
         return True
     raise Exception('No pending buy')
 
@@ -236,7 +237,7 @@ def cancelBuy(id):
     id = ObjectId(id)
     # clear the pending transaction
     if (getUser(id)['pending_buy']):
-        dbCallWrapper({'_id': id}, {'$set': {'pending_buy': None}}, func = db.user.update_one)
+        dbCallWrapper({'_id': id}, {'$set': {'pending_buy': None}}, func = db.user.update_one, eventLog = {'type': 'debugEvent', 'username': str(id), 'timestamp': int(time.time()), 'action': 'CANCEL_BUY'})
         return True
     raise Exception('No pending buy')
 
@@ -252,7 +253,9 @@ def setBuyAmount(id, stock, amount):
                 'type': 'buy'
             }
         }
-    }, func = db.user.update_one)
+    }, func = db.user.update_one, 
+    eventLog = {'type': 'debugEvent', 'username': str(id), 'timestamp': int(time.time()), 'action': 'SET_BUY_AMOUNT', 'stock': stock, 'amount': amount})
+    
 
 def setSellAmount(id, stock, amount):
     id = ObjectId(id)
@@ -263,9 +266,9 @@ def setSellAmount(id, stock, amount):
                 'stock': stock,
                 'amount': amount,
                 'type': 'sell'
-            }
+                }
         }
-    }, func = db.user.update_one)
+    }, func = db.user.update_one, eventLog={'type': 'debugEvent', 'username': str(id), 'timestamp': int(time.time()), 'action': 'SET_BUY_AMOUNT', 'stock': stock, 'amount': amount})
 
 def setBuyTrigger(id, stock, price):
     id = ObjectId(id)
@@ -281,7 +284,9 @@ def setBuyTrigger(id, stock, price):
                     }
                 }
             }
-        }, func = db.user.update_one)
+        }, func = db.user.update_one,
+        eventLog = {'type': 'debugEvent', 'username': str(id), 'timestamp': int(time.time()), 'action': 'SET_BUY_TRIGGER', 'stock': stock, 'price': price})
+        
     raise Exception('No pending trigger')
 
 def setSellTrigger(id, stock, price):
@@ -298,17 +303,17 @@ def setSellTrigger(id, stock, price):
                     }
                 }
             }
-        }, func = db.user.update_one)
+        }, func = db.user.update_one, eventLog = {'type': 'debugEvent', 'username': str(id), 'timestamp': int(time.time()), 'action': 'SET_BUY_TRIGGER', 'stock': stock, 'price': price})
     raise Exception('No pending trigger')
 def cancelSellTrigger(id, stock):
     id = ObjectId(id)
     user = getUser(id)
     if(user['sell_triggers'][stock] and user['triggers'][stock]['type'] == 'sell'):
-        return db.user.update_one({'_id': id}, {
+        return dbCallWrapper({'_id': id}, {
             '$set': {
                 'triggers.' + stock: None
             }
-        })
+        }, func = db.user.update_one, eventLog={'type': 'debugEvent', 'username': str(id), 'timestamp': int(time.time()), 'action': 'CANCEL_SELL_TRIGGER', 'stock': stock})
     raise Exception('No active sell trigger on specified stock')
 
 def cancelBuyTrigger(id, stock):
@@ -319,8 +324,8 @@ def cancelBuyTrigger(id, stock):
             '$set': {
                 'triggers.' + stock: None
             }
-        }, func = db.user.update_one)
+        }, func = db.user.update_one, eventLog = {'type': 'debugEvent', 'username': str(id), 'timestamp': int(time.time()), 'action': 'CANCEL_SELL_TRIGGER', 'stock': stock})
 
 def getTriggers():
 
-    return dbCallWrapper({}, {'triggers': 1}, func = db.user.find)
+    return dbCallWrapper({}, {'triggers': 1}, func = db.user.find, eventLog = False)
