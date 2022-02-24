@@ -98,8 +98,9 @@ def cancel_set_sell(request):
 @logRequest
 @api_view(['GET'])
 def dumplog(request):
-     
-    return FileResponse(open('./logs/transactionserver.txt', 'rb'))
+    if 'userid' in request.GET.keys():
+        return Response(dumplogXML(request.GET['userid']))
+    return Response(dumplogXML())
     
 
 @logRequest

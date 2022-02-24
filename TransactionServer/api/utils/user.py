@@ -329,3 +329,24 @@ def cancelBuyTrigger(id, stock):
 def getTriggers():
 
     return dbCallWrapper({}, {'triggers': 1}, func = db.user.find, eventLog = False)
+
+def dumplogXML(id = None):
+    if(id):
+        id = id
+        docs = dbCallWrapper({'username': id}, {}, func = db.log.find, eventLog = False)
+    else:
+        docs = dbCallWrapper({}, {}, func = db.log.find, eventLog = False)
+    new_docs = '<?xml version="1.0" encoding="US-ASCII"?>\n\t<log>'
+    for doc in docs:
+        new_docs += '\t<'+doc['type']+'>\n'
+        if 'transactionId' in doc.keys():
+            new_docs += '\t\t<transactionId>'+doc['transactionId']+'</transactionId>\n'
+        else:
+            new_docs += '\t\t<transactionId>'+doc['_id']+'</transactionId>\n'
+        for key in doc:
+            if key != 'type' and key != '_id' and key != 'transactionId':
+                new_docs += '\t\t<'+key+'>'+doc[key]+'</'+key+'>\n'
+        new_docs += '\t</'+doc['type']+'>\n'
+    new_docs += '</log>'
+    return new_docs
+            
