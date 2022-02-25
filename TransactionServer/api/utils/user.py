@@ -280,7 +280,8 @@ def setBuyTrigger(id, stock, price):
                 'triggers': {
                     stock: {
                         'amount': getUser(id)['pendingTrigger']['amount'],
-                        'price': price
+                        'price': price,
+                        'userid': id
                     }
                 }
             }
@@ -299,7 +300,8 @@ def setSellTrigger(id, stock, price):
                 'sell_triggers': {
                     stock: {
                         'amount': getUser(id)['pendingTrigger']['amount'],
-                        'price': price
+                        'price': price,
+                        'userid': id
                     }
                 }
             }
@@ -328,7 +330,7 @@ def cancelBuyTrigger(id, stock):
 
 def getTriggers():
 
-    return dbCallWrapper({}, {'triggers': 1}, func = db.user.find, eventLog = False)
+    return dbCallWrapper({}, {'buy_triggers': 1, 'sell_triggers': 1}, func = db.user.find, eventLog = False)
 
 def dumplogXML(id = None):
     if(id):

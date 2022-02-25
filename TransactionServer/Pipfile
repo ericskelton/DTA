@@ -12,6 +12,7 @@ django-environ = "*"
 django-cors-headers = "*"
 lxml = "*"
 mango-jwt = "*"
+django-crontab = "*"
 
 [dev-packages]
 

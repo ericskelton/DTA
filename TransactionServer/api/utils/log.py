@@ -101,5 +101,5 @@ def logJson(json):
     """
     if(not env('LOG')):
         return
-    dbCallWrapper(json, func = db.log.insert_one)
-    return
+    
+    return dbCallWrapper(json, func = db.log.insert_one)
