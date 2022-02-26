@@ -6,9 +6,6 @@ from django.contrib.auth import authenticate
 
 
 
-class QuoteSerializer(serializers.Serializer):
-    pass
-
 class UserSerializer(serializers.ModelSerializer):
     
     """Handles serialization and deserialization of User objects."""
@@ -70,8 +67,6 @@ class UserSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
-
-
 
 class RegistrationSerializer(serializers.ModelSerializer):
     """Serializers registration requests and creates a new user."""
@@ -136,13 +131,93 @@ class AddSerializer(serializers.Serializer):
         instance.save()
         return instance
 
-        #or
-        #instance.balance = instance.balance + amount_to_add
-        #instance.save()
-
+class UsernameSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=255, required=True)
+    def validate(self, data):
+        username = data.get('username', None)
+        if username is None:
+            raise serializers.ValidationError(
+                'An username is required'
+            )
+        return { "username": username}
         
+class UsernameStockSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=255, required=True)
+    ticker = serializers.CharField(max_length=255, required=True)
 
+    def validate(self, data):
+        username = data.get('username', '')
+        ticker = data.get("ticker", '')
+        
+        if username is None:
+            raise serializers.ValidationError(
+                'A username is required'
+            )
+        if ticker is None:
+             raise serializers.ValidationError(
+                'A ticker is required '
+            )
+       
+        return { "username": username, "ticker": ticker}
 
+class UsernameAmountSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=255, required=True)
+    amount = serializers.IntegerField(required=True)
+   
+
+    def validate(self, data):
+        username = data.get('username', None)
+        amount = data.get("amount", None)
+        if username is None:
+            raise serializers.ValidationError(
+                'An username is required'
+            )
+        if amount is None:
+            raise serializers.ValidationError(
+                'An amount is required'
+            )
+        
+        return { "username": username, "amount": amount}
+
+class UsernameAmountStockSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=255, required=True)
+    ticker = serializers.CharField(max_length=255, required=True)
+    amount = serializers.IntegerField(required=True)
+
+    def validate(self, data):
+        print("in serializer data is: ", data)
+        username = data.get('username', None)
+        ticker = data.get("ticker", None)
+        amount = data.get("amount", None)
+
+        print("user name is: ", username)
+        if username is None:
+            raise serializers.ValidationError(
+                'A username is required'
+            )
+        if ticker is None:
+             raise serializers.ValidationError(
+                'A ticker is required '
+            )
+        if amount is None:
+            raise serializers.ValidationError(
+                'An amount is required'
+            )
+        return { "username": username, "ticker": ticker, "amount": amount}
+
+class UsernameDumplogSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=255, required=False)
+    filename = serializers.CharField(max_length=255, required=True)
+
+    def validate(self, data):
+        username = data.get('username', None)
+        filename = data.get("filename", None)
+
+        if filename is None:
+            raise serializers.ValidationError(
+                'A username is required'
+            )
+        return { "username": username, "filename": filename}
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=255)
