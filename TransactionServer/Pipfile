@@ -13,6 +13,7 @@ django-cors-headers = "*"
 lxml = "*"
 mango-jwt = "*"
 django-crontab = "*"
+key-generator = "*"
 
 [dev-packages]
 

@@ -1,12 +1,12 @@
 from api.utils.user import getTriggers, buyStock, sellStock, commitBuy, commitSell
 from utils.quoteServer import getQuote
-from api.utils.log import logJson
+from api.utils.log import *
 import time
 def trigger_job():
     triggers = getTriggers()
     sell_triggers = triggers['sell_triggers']
     buy_triggers = triggers['buy_triggers']
-    transactionId = logJson({'type': 'systemEvent', 'event': 'trigger_job', 'server': 'transactionserver', 'timestamp': str(int(time.time()))})
+    transactionId = logJsonObject({'type': 'systemEvent', 'event': 'trigger_job', 'server': 'transactionserver', 'timestamp': str(int(time.time()))})
     startTime = time.time()
     triggers_executed = 0
     for stock in buy_triggers:
@@ -22,7 +22,7 @@ def trigger_job():
             commitSell(sell_triggers[stock]['userid'], stock, transactionId)
             triggers_executed += 1
 
-    logJson({'type': 'systemevent', 'event': 'trigger_job_executed', 'activeTriggers': str(len(buy_triggers.keys()) + len(sell_triggers.keys())), 'triggers_executed': triggers_executed, 'time': str(time.time() - startTime) + ' seconds', 'transactionId': transactionId})
+    logJsonObject({'type': 'systemevent', 'event': 'trigger_job_executed', 'activeTriggers': str(len(buy_triggers.keys()) + len(sell_triggers.keys())), 'triggers_executed': triggers_executed, 'time': str(time.time() - startTime) + ' seconds', 'transactionId': transactionId})
 
     return
 

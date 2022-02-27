@@ -16,4 +16,6 @@ COPY Pipfile Pipfile.lock ${PROJECT_DIR}/
 
 RUN pipenv install --system --deploy
 
+RUN python manage.py crontab add
+
 CMD ["python", "./manage.py", "runserver"]

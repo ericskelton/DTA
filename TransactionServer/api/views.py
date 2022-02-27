@@ -5,102 +5,161 @@ from api.utils.quoteServer import getQuote
 from api.utils.user import *
 from api.utils.errors import handleViewError
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, renderer_classes
+from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
-from django.http import FileResponse
 from api.utils.log import logRequest
 
 @logRequest
 @api_view(['GET'])
-def quote (request):
+def quote(request, **kwargs):
+    userId = "6211857dc98b9aa98bf047a9"
     # TODO: redis this, then have the buy and sell commands use the redis cache before hitting the quote server
-    return Response(getQuote(request.GET['ticker']))
+    ticker = kwargs.get('ticker')
+    try:
+        if ticker is None:
+            raise Exception("ticker not specified")
+        return Response(getQuote(ticker, userId,request.transactionId))
+    except Exception as e:
+        return handleViewError(e, request)
     
 @logRequest
 @api_view(['POST', 'PATCH'])
 def add(request):
      
-    body = request.POST
-    # TODO: userId needs to be real (authenticated and shit)
+    
     userId = "6211857dc98b9aa98bf047a9"
-    amount = body['amount']
-    return Response(addBalance(userId, amount, request.transactionId))
+    amount = request.data.get('amount', False) 
+    try:
+        return Response(addBalance(userId, amount, request.transactionId))
+    except Exception as e:
+        return handleViewError(e, request)
                  
 @logRequest
 @api_view(['POST'])
 def buy(request):
-    
     userid = "6211857dc98b9aa98bf047a9"
-    return Response(buyStock(userid, request.POST['amount'], request.transactionId))
+    ticker = request.data.get('ticker', False)
+    amount = request.data.get('amount', False)
+    try: 
+        return Response(buyStock(userid, amount,getQuote(ticker,userid, request.transactionId), request.transactionId))
+    except Exception as e:
+        return handleViewError(e, request)
 
 @logRequest
-@api_view(['POST'])
+@api_view(['PATCH'])
 def commit_buy(request):
+    
     userid = "6211857dc98b9aa98bf047a9"
-    return Response(commitBuy(userid, request.transactionId))
+    try:
+        return Response(commitBuy(userid, request.transactionId))
+    except Exception as e:
+        return handleViewError(e, request)
+         
 
 @logRequest
 @api_view(['POST'])
 def cancel_buy(request): 
     userid = "6211857dc98b9aa98bf047a9"
-    return Response(cancelBuy(userid, request.transactionId))
+    try:
+        return Response(cancelBuy(userid, request.transactionId))
+    except Exception as e:
+        return handleViewError(e, request)
 
 @logRequest
 @api_view(['POST'])
 def sell(request):
     userid = "6211857dc98b9aa98bf047a9"
-    return Response(sellStock(userid, request.POST['amount'], request.transactionId))
-
+    amount = request.data.get('amount', False)
+    ticker = request.data.get('ticker', False)
+    try:
+        return Response(sellStock(userid, amount, getQuote(ticker, userid, request.transactionId), request.transactionId))
+    except Exception as e:
+        return handleViewError(e, request)
 @logRequest
 @api_view(['POST'])
 def commit_sell(request):
     userid = "6211857dc98b9aa98bf047a9"
-    return Response(commitSell(userid, request.transactionId))
-
+    try:
+        return Response(commitSell(userid, request.transactionId))
+    except Exception as e:
+        return handleViewError(e, request)
 @logRequest
 @api_view(['POST'])
 def cancel_sell(request):
     userid = "6211857dc98b9aa98bf047a9"
-    return Response(cancelSell(userid, request.transactionId))
+    try:
+        return Response(cancelSell(userid, request.transactionId))
+    except Exception as e:
+        return handleViewError(e, request)
 
 @logRequest
 @api_view(['POST'])
 def set_buy_amount(request): 
     userid = "6211857dc98b9aa98bf047a9"
-    return Response(setBuyAmount(userid, request.POST['amount'], request.transactionId))
-
+    amount = request.data.get('amount', False)
+    ticker = request.data.get('ticker', False)
+    try:
+        return Response(setBuyAmount(userid, ticker,amount, request.transactionId))
+    except Exception as e:
+        return handleViewError(e, request)
 @logRequest
 @api_view(['POST'])
 def cancel_set_buy(request):
-    pass
+    userid = "6211857dc98b9aa98bf047a9"
+    ticker = request.data.get('ticker', False)
+    try:
+        return Response(cancelBuyTrigger(userid,ticker,request.transactionId))
+    except Exception as e:
+        return handleViewError(e, request)
 
 @logRequest
 @api_view(['POST'])
 def set_buy_trigger(request):
     userid = "6211857dc98b9aa98bf047a9"
-    return Response(setBuyTrigger(userid, request.POST['trigger']))
-
+    ticker = request.data.get('ticker', False)
+    price = request.data.get('price', False)
+    try:
+        return Response(setBuyTrigger(userid, ticker, price,request.transactionId))
+    except Exception as e:
+        return handleViewError(e, request)
 @logRequest
 @api_view(['POST'])
 def set_sell_amount(request):
-    return Response("Not implemented")
-
+    userid = "6211857dc98b9aa98bf047a9"
+    amount = request.data.get('amount', False)
+    try:
+        return Response(setSellAmount(userid, amount, request.transactionId))
+    except Exception as e:
+        return handleViewError(e, request)
 @logRequest
 @api_view(['POST'])
 def set_sell_trigger(request):
-    Response("Not implemented")
-    
+    userid = "6211857dc98b9aa98bf047a9"
+    price = request.data.get('price', False)
+    ticker = request.data.get('ticker', False)
+    try:
+        return Response(setSellTrigger(userid, ticker, price, request.transactionId))
+    except Exception as e:
+        return handleViewError(e, request)
 @logRequest
 @api_view(['POST'])
 def cancel_set_sell(request):
-    return Response("Not implemented")
-    
+    userid = "6211857dc98b9aa98bf047a9"
+    ticker = request.data.get('ticker', False)
+    try:
+        return Response(cancelSellTrigger(userid, ticker,request.transactionId))
+    except Exception as e:
+        return handleViewError(e, request)
 @logRequest
 @api_view(['GET'])
 def dumplog(request):
-    if 'userid' in request.GET.keys():
-        return Response(dumplogXML(request.GET['userid']))
-    return Response(dumplogXML())
+    try:
+        if 'userid' in request.GET.keys():
+            return Response(dumplogXML(request.GET['userid']))
+        return Response(dumplogXML())
+    except Exception as e:
+        return handleViewError(e, request)
     
 
 @logRequest
