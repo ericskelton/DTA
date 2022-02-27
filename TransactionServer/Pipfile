@@ -6,6 +6,14 @@ name = "pypi"
 [packages]
 django = "*"
 djangorestframework = "*"
+pymongo = "*"
+dnspython = "*"
+django-environ = "*"
+django-cors-headers = "*"
+lxml = "*"
+mango-jwt = "*"
+django-crontab = "*"
+key-generator = "*"
 
 [dev-packages]
 
