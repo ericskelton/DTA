@@ -60,7 +60,7 @@ MIDDLEWARE = [
 ]
 
 CRONJOBS = [
-    ('* * * * *', 'api.cron.trigger_job')
+    ('* * * * *', 'api.cron.cron.trigger_job')
 ]
 
 ROOT_URLCONF = 'TransactionServer.urls'
