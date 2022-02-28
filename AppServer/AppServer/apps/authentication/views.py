@@ -112,9 +112,9 @@ class QuoteAPIView(APIView):
     renderer_classes = (UserJSONRenderer,)
     serializer_class = UsernameStockSerializer
 
-    def retrieve(self, request):
+    def get(self, request):
         params = request.query_params
-        serializer = self.serializer_class(params)
+        serializer = self.serializer_class(data=params)
         serializer.is_valid(raise_exception=True)
         message = {"message": "quote endpoint", "serializer_data": serializer.data}
         return Response(message, status=status.HTTP_200_OK)
