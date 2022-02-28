@@ -292,7 +292,8 @@ def setBuyTrigger(id, stock, price, transactionId):
                 'triggers'+'.'+stock: {
                     'amount': getUser(id)['pending_trigger']['amount'],
                     'price': price,
-                    'userid': id
+                    'userid': id,
+                    'type': 'buy'
                     
                 }
             }
@@ -312,7 +313,8 @@ def setSellTrigger(id, stock, price, transactionId):
                     stock: {
                         'amount': getUser(id)['pending_trigger']['amount'],
                         'price': price,
-                        'userid': id
+                        'userid': id,
+                        'type': 'sell'
                     }
                 }
             }
