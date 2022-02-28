@@ -7,19 +7,24 @@ def trigger_job():
     transactionId = logJsonObject({'type': 'systemEvent', 'event': 'trigger_job', 'server': 'transactionserver', 'timestamp': str(int(time.time()))})
     startTime = time.time()
     triggers_executed = 0
-    for stock in triggers:
-        quote = getQuote(stock)
-        if triggers[stock]['type'] == 'buy' and quote['price'] <= triggers[stock]['price']: 
-            buyStock(triggers[stock]['userid'], triggers[stock]['amount'], transactionId)
-            commitBuy(triggers[stock]['userid'], stock, transactionId)
-            triggers_executed += 1
-        elif triggers[stock]['type'] == 'sell' and quote['price'] >= triggers[stock]['price']: 
-            sellStock(sell_triggers[stock]['userid'], sell_triggers[stock]['amount'], transactionId)
-            commitSell(sell_triggers[stock]['userid'], stock, transactionId)
-            triggers_executed += 1
+    for trigger in triggers:
+        
+        for stock in trigger['buy_triggers'].keys():
+            quote = getQuote(stock, trigger['_id'], transactionId)
+            if trigger['buy_triggers'][stock]['price'] > quote[stock]:
+                buyStock(trigger['_id'], trigger['buy_triggers'][stock]['amount'], quote, transactionId)
+                commitBuy(trigger['_id'], transactionId)
+                triggers_executed += 1
+        for stock in trigger['sell_triggers'].keys():
+            quote = getQuote(stock, trigger['_id'], transactionId)
+            if trigger['sell_triggers'][stock]['price'] < quote[stock]:
+                sellStock(trigger['_id'], trigger['sell_triggers'][stock]['amount'], quote, transactionId)
+                commitSell(trigger['_id'], transactionId)
+                triggers_executed += 1
+    endTime = time.time()
             
 
-    logJsonObject({'type': 'systemevent', 'event': 'trigger_job_executed', 'activeTriggers': str(len(buy_triggers.keys()) + len(sell_triggers.keys())), 'triggers_executed': triggers_executed, 'time': str(time.time() - startTime) + ' seconds', 'transactionId': transactionId})
+    logJsonObject({'type': 'systemevent', 'event': 'trigger_job_executed',  'triggers_executed': triggers_executed, 'time': str(time.time() - startTime) + ' seconds', 'transactionId': transactionId})
 
     return
 
