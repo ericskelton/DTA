@@ -160,7 +160,6 @@ class CancelBuyAPIView(APIView):
             data=user, 
         )
         serializer.is_valid(raise_exception=True)
-        serializer.save()
         message = {"message": "cancel buy endpoint", "serializer_data":serializer.data}
         return Response(message, status=status.HTTP_200_OK)
 
@@ -177,7 +176,6 @@ class SellStockAPIView(APIView):
 
         )
         serializer.is_valid(raise_exception=True)
-        serializer.save()
         message = {"message": "sell stock endpoint", "serializer_data":serializer.data}
         return Response(message, status=status.HTTP_200_OK)
 
@@ -315,7 +313,6 @@ class DumpLogAPIVeiw(APIView):
         
         )
         serializer.is_valid(raise_exception=True)
-        serializer.save()
         message = {"message": "dump log for admin", "serializer_data":serializer.data}
         return Response(message, status=status.HTTP_200_OK)
 
