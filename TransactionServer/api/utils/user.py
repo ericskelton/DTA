@@ -53,7 +53,7 @@ def createUser(name, email, password):
         'pending_buy':{},
         'pending_sell':{},
         'sell_triggers': {},
-        'buy_triggers': {}
+        'buy_triggers': {},
         'pending_trigger': {}
         }, func = db.user.insert_one)
 
