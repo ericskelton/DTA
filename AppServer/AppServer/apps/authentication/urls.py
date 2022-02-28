@@ -32,7 +32,7 @@ urlpatterns = [
     #DTA specific
     path('add/', AddAPIView.as_view()),
     path('quote', QuoteAPIView.as_view()),
-    path('buy/', BuyStockAPIView.as_view()),
+    path('buy', BuyStockAPIView.as_view()),
     path('commitbuy/', CommitBuyAPIView.as_view()),
     path('cancelbuy/', CancelBuyAPIView.as_view()),
     path('sell/', SellStockAPIView.as_view()),

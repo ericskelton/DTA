@@ -19,7 +19,9 @@ from .serializers import (
     UsernameAmountStockSerializer, 
     UsernameSerializer,
     UsernameStockSerializer,
-    UsernameDumplogSerializer
+    UsernameDumplogSerializer,
+    UsernameAmountSerializer
+
 )
 
 
@@ -83,10 +85,6 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
 
         # Here is that serialize, validate, save pattern we talked about
         # before.
-        print("in api view for request data is ", request.data)
-        print("request user is: ", request.user)
-        print("retrieve user api view serializer_data is: ", serializer_data)
-        print("about to go into user serializer update function")
         serializer = self.serializer_class(
             request.user, 
             data=serializer_data, 
@@ -98,9 +96,9 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class AddAPIView(RetrieveUpdateAPIView):
-    permission_clases = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     renderer_classes = (UserJSONRenderer,)
-    serializer_class = UsernameAmountStockSerializer
+    serializer_class = UsernameAmountSerializer
 
     def post(self, request):
         user = request.data.get('user', {})
@@ -122,55 +120,71 @@ class QuoteAPIView(APIView):
         return Response(message, status=status.HTTP_200_OK)
 
 class BuyStockAPIView(APIView):
-    permission_clases = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     renderer_classes = (UserJSONRenderer,)
     serializer_class = UsernameAmountStockSerializer
 
     def post(self, request):
         user = request.data.get('user', {})
-        serializer = self.serializer_class(data=user, partial=True)
+        serializer = self.serializer_class(
+            data=user, 
+            partial=True
+        )
         serializer.is_valid(raise_exception=True)
         message = {"message": "buy stock endpoint", "serializer_data":serializer.data}
         return Response(message, status=status.HTTP_200_OK)
 
 class CommitBuyAPIView(APIView):
-    permission_clases = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     renderer_classes = (UserJSONRenderer,)
     serializer_class = UsernameSerializer
 
     def post(self, request):
         user = request.data.get('user', {})
-        serializer = self.serializer_class(data=user)
+        serializer = self.serializer_class(
+            data=user, 
+            partial=True
+        )
         serializer.is_valid(raise_exception=True)
         message = {"message": "commit buy endpoint", "serializer_data":serializer.data}
         return Response(message, status=status.HTTP_200_OK)
 
 class CancelBuyAPIView(APIView):
-    permission_clases = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     renderer_classes = (UserJSONRenderer,)
     serializer_class = UsernameSerializer
 
     def post(self, request):
         user = request.data.get('user', {})
-        serializer = self.serializer_class(data=user)
+        serializer = self.serializer_class(
+            request.user, 
+            data=user, 
+            partial=True
+        )
         serializer.is_valid(raise_exception=True)
+        serializer.save()
         message = {"message": "cancel buy endpoint", "serializer_data":serializer.data}
         return Response(message, status=status.HTTP_200_OK)
 
 class SellStockAPIView(APIView):
-    permission_clases = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     renderer_classes = (UserJSONRenderer,)
     serializer_class = UsernameAmountStockSerializer
 
     def post(self, request):
         user = request.data.get('user', {})
-        serializer = self.serializer_class(data=user)
+        serializer = self.serializer_class(
+            request.user, 
+            data=user, 
+            partial=True
+        )
         serializer.is_valid(raise_exception=True)
+        serializer.save()
         message = {"message": "sell stock endpoint", "serializer_data":serializer.data}
         return Response(message, status=status.HTTP_200_OK)
 
 class CommitSellAPIView(APIView):
-    permission_clases = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     renderer_classes = (UserJSONRenderer,)
     serializer_class = UsernameSerializer
 
@@ -182,92 +196,127 @@ class CommitSellAPIView(APIView):
         return Response(message, status=status.HTTP_200_OK)
 
 class CancelSellAPIView(RetrieveAPIView):
-    permission_clases = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     renderer_classes = (UserJSONRenderer,)
     serializer_class = UsernameSerializer
 
     def post(self, request):
         user = request.data.get('user', {})
-        serializer = self.serializer_class(data=user)
+        serializer = self.serializer_class(
+            request.user, 
+            data=user, 
+            partial=True
+        )
         serializer.is_valid(raise_exception=True)
+        serializer.save()
         message = {"message": "cancel sell endpoint", "serializer_data":serializer.data}
         return Response(message, status=status.HTTP_200_OK)
 
 class SetBuyAmountAPIView(RetrieveAPIView):
-    permission_clases = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     renderer_classes = (UserJSONRenderer,)
     serializer_class = UsernameAmountStockSerializer
 
     def post(self, request):
         user = request.data.get('user', {})
-        serializer = self.serializer_class(data=user)
+        serializer = self.serializer_class(
+            request.user, 
+            data=user, 
+            partial=True
+        )
         serializer.is_valid(raise_exception=True)
+        serializer.save()
         message = {"message": "set buy amount endpoint", "serializer_data":serializer.data}
         return Response(message, status=status.HTTP_200_OK)
 
 class CancelSetBuyAPIView(RetrieveAPIView):
-    permission_clases = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     renderer_classes = (UserJSONRenderer,)
     serializer_class = UsernameAmountStockSerializer
 
     def post(self, request):
         user = request.data.get('user', {})
-        serializer = self.serializer_class(data=user)
+        serializer = self.serializer_class(
+            request.user, 
+            data=user, 
+            partial=True
+        )
         serializer.is_valid(raise_exception=True)
+        serializer.save()
         message = {"message": "cancel set buy endpoint", "serializer_data":serializer.data}
         return Response(message, status=status.HTTP_200_OK)
 
 class SetBuyTriggerAPIView(APIView):
-    permission_clases = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     renderer_classes = (UserJSONRenderer,)
     serializer_class = UsernameAmountStockSerializer
 
     def post(self, request):
         user = request.data.get('user', {})
-        serializer = self.serializer_class(data=user)
+        serializer = self.serializer_class(
+            request.user, 
+            data=user, 
+            partial=True
+        )
         serializer.is_valid(raise_exception=True)
+        serializer.save()
         message = {"message": "set buy trigger endpoint", "serializer_data":serializer.data}
         return Response(message, status=status.HTTP_200_OK)
 
 class SetSellAmountAPIView(RetrieveAPIView):
-    permission_clases = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     renderer_classes = (UserJSONRenderer,)
     serializer_class = UsernameAmountStockSerializer
 
     def post(self, request):
         user = request.data.get('user', {})
-        serializer = self.serializer_class(data=user)
+        serializer = self.serializer_class(
+            request.user, 
+            data=user, 
+            partial=True
+        )
         serializer.is_valid(raise_exception=True)
+        serializer.save()
         message = {"message": "set sell amount endpoint", "serializer_data":serializer.data}
         return Response(message, status=status.HTTP_200_OK)
 
 class SetSellTriggerAPIView(APIView):
-    permission_clases = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     renderer_classes = (UserJSONRenderer,)
     serializer_class = UsernameAmountStockSerializer
 
     def post(self, request):
         user = request.data.get('user', {})
-        serializer = self.serializer_class(data=user)
+        serializer = self.serializer_class(
+            request.user, 
+            data=user, 
+            partial=True
+        )
         serializer.is_valid(raise_exception=True)
+        serializer.save()
         message = {"message": "set sell trigger endpoint", "serializer_data":serializer.data}
         return Response(message, status=status.HTTP_200_OK)
 
 class CancelSellSetAPIView(APIView):
-    permission_clases = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     renderer_classes = (UserJSONRenderer,)
     serializer_class = UsernameStockSerializer
 
     def post(self, request):
         user = request.data.get('user', {})
-        serializer = self.serializer_class(data=user)
+        serializer = self.serializer_class(
+            request.user, 
+            data=user, 
+            partial=True
+        )
         serializer.is_valid(raise_exception=True)
+        serializer.save()
         message = {"message": "set sell trigger endpoint", "serializer_data":serializer.data}
         return Response(message, status=status.HTTP_200_OK)
 
 #get probably
 class DumpLogAPIVeiw(APIView):
-    permission_clases = (DumplogPermissions,)
+    permission_classes = (DumplogPermissions,)
     renderer_classes = (UserJSONRenderer,)
     serializer_class = UsernameDumplogSerializer
 
@@ -280,13 +329,18 @@ class DumpLogAPIVeiw(APIView):
     
     def post(self, request):
         user = request.data.get('user', {})
-        serializer = self.serializer_class(data=user)
+        serializer = self.serializer_class(
+            request.user, 
+            data=user, 
+            partial=True
+        )
         serializer.is_valid(raise_exception=True)
+        serializer.save()
         message = {"message": "dump log for admin", "serializer_data":serializer.data}
         return Response(message, status=status.HTTP_200_OK)
 
 class DisplaySummary(APIView):
-    permission_clases = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     renderer_classes = (UserJSONRenderer,)
     serializer_class = UsernameSerializer
     
