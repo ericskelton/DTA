@@ -8,7 +8,7 @@ def trigger_job():
     startTime = time.time()
     triggers_executed = 0
     for trigger in triggers:
-        
+        print(trigger)
         for stock in trigger['buy_triggers'].keys():
             quote = getQuote(stock, trigger['_id'], transactionId)
             if trigger['buy_triggers'][stock]['price'] > quote[stock]:
