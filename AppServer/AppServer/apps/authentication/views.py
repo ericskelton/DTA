@@ -232,7 +232,7 @@ class SetBuyAmountAPIView(RetrieveAPIView):
 class CancelSetBuyAPIView(RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
     renderer_classes = (UserJSONRenderer,)
-    serializer_class = UsernameAmountStockSerializer
+    serializer_class = UsernameStockSerializer
 
     def post(self, request):
         user = request.data.get('user', {})
