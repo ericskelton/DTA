@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path('quote/<str:ticker>/', views.quote, name='quote'),
+    path('quote/', views.quote, name='quote'),
     path('add/', views.add, name='add'),
     path('createUser/', views.createNewUser, name='createUser'), # don't need to log this one
     path('getUser/',  views.getUserObj, name='getUser'),
