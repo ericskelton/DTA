@@ -1,5 +1,5 @@
 from api.utils.user import getTriggers, buyStock, sellStock, commitBuy, commitSell
-from utils.quoteServer import getQuote
+from api.utils.quoteServer import getQuote
 from api.utils.db import logJsonObject
 import time
 def trigger_job():
