@@ -49,11 +49,12 @@ def createUser(name, email, password):
         'password': sha256(password.encode('utf-8')).hexdigest(),
         'balance': 0.00, 
         'transactions': [], 
-        'stocks': [],
+        'stocks': {},
         'pending_buy':{},
         'pending_sell':{},
-        'triggers': [],
-        'pending_triggers': []
+        'sell_triggers': {},
+        'buy_triggers': {},
+        'pending_trigger': {}
         }, func = db.user.insert_one)
 
 def login(email, password):
@@ -189,7 +190,7 @@ def commitSell(id, transactionId):
     user = getUser(id)
     transaction = user['pending_sell']
     if(transaction):
-        if(time.time() - transaction['timestamp'] > 60):
+        if(time.time() - float(transaction['timestamp']) > 60):
             # clear the pending transaction
             dbCallWrapper({'_id': id}, {'$set': {'pending_sell': None}}, func = db.user.update_one)
             raise Exception('Quote expired')
@@ -225,7 +226,7 @@ def commitSell(id, transactionId):
                     '$push':{
                         'transactions': transaction,
                         'stocks.' + transaction['stock'] + '.price': {
-                            -transaction['amount']: transaction['price']
+                            '-' + str(transaction['amount']): transaction['price']
                         }
                     },
                     '$set': {
@@ -258,7 +259,7 @@ def setBuyAmount(id, stock, amount, transactionId):
     
     return dbCallWrapper({'_id': id}, {
         '$set': {
-            'pendingTrigger': {
+            'pending_trigger': {
                 'stock': stock,
                 'amount': amount,
                 'type': 'buy'
@@ -273,7 +274,7 @@ def setSellAmount(id, stock, amount, transactionId):
 
     return dbCallWrapper({'_id': id}, {
         '$set': {
-            'pendingTrigger': {
+            'pending_trigger': {
                 'stock': stock,
                 'amount': amount,
                 'type': 'sell'
@@ -284,16 +285,16 @@ def setSellAmount(id, stock, amount, transactionId):
 def setBuyTrigger(id, stock, price, transactionId):
     id = ObjectId(id)
     
-    if(getUser(id)['pendingTrigger']['stock'] == stock and getUser(id)['pendingTrigger']['type'] == 'buy'):
+    if(getUser(id)['pending_trigger']['stock'] == stock and getUser(id)['pending_trigger']['type'] == 'buy'):
         return dbCallWrapper({'_id': id}, {
             '$set': {
                 'pending_trigger': None,
-                'triggers': {
-                    stock: {
-                        'amount': getUser(id)['pendingTrigger']['amount'],
-                        'price': price,
-                        'userid': id
-                    }
+                'triggers'+'.'+stock: {
+                    'amount': getUser(id)['pending_trigger']['amount'],
+                    'price': price,
+                    'userid': id,
+                    'type': 'buy'
+                    
                 }
             }
         }, func = db.user.update_one,
@@ -304,15 +305,16 @@ def setBuyTrigger(id, stock, price, transactionId):
 def setSellTrigger(id, stock, price, transactionId):
     id = ObjectId(id)
 
-    if(getUser(id)['pendingTrigger']['stock'] == stock and getUser(id)['pendingTrigger']['type'] == 'sell'):
+    if(getUser(id)['pending_trigger']['stock'] == stock and getUser(id)['pending_trigger']['type'] == 'sell'):
         return dbCallWrapper({'_id': id}, {
             '$set': {
                 'pending_trigger': None,
                 'sell_triggers': {
                     stock: {
-                        'amount': getUser(id)['pendingTrigger']['amount'],
+                        'amount': getUser(id)['pending_trigger']['amount'],
                         'price': price,
-                        'userid': id
+                        'userid': id,
+                        'type': 'sell'
                     }
                 }
             }

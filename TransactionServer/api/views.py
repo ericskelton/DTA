@@ -13,12 +13,16 @@ from api.utils.log import logRequest
 @logRequest
 @api_view(['GET'])
 def quote(request, **kwargs):
-    userId = "6211857dc98b9aa98bf047a9"
+    userId = "621c2225545c6aa5b6b9b83a"
     # TODO: redis this, then have the buy and sell commands use the redis cache before hitting the quote server
     ticker = kwargs.get('ticker')
+    if ticker is None:
+        ticker = request.GET.get('ticker')
     try:
         if ticker is None:
-            raise Exception("ticker not specified")
+            raise Exception('No ticker specified')
+    
+        
         return Response(getQuote(ticker, userId,request.transactionId))
     except Exception as e:
         return handleViewError(e, request)
@@ -28,7 +32,7 @@ def quote(request, **kwargs):
 def add(request):
      
     
-    userId = "6211857dc98b9aa98bf047a9"
+    userId = "621c2225545c6aa5b6b9b83a"
     amount = request.data.get('amount', False) 
     try:
         return Response(addBalance(userId, amount, request.transactionId))
@@ -38,7 +42,7 @@ def add(request):
 @logRequest
 @api_view(['POST'])
 def buy(request):
-    userid = "6211857dc98b9aa98bf047a9"
+    userid = "621c2225545c6aa5b6b9b83a"
     ticker = request.data.get('ticker', False)
     amount = request.data.get('amount', False)
     try: 
@@ -50,7 +54,7 @@ def buy(request):
 @api_view(['PATCH'])
 def commit_buy(request):
     
-    userid = "6211857dc98b9aa98bf047a9"
+    userid = "621c2225545c6aa5b6b9b83a"
     try:
         return Response(commitBuy(userid, request.transactionId))
     except Exception as e:
@@ -60,7 +64,7 @@ def commit_buy(request):
 @logRequest
 @api_view(['POST'])
 def cancel_buy(request): 
-    userid = "6211857dc98b9aa98bf047a9"
+    userid = "621c2225545c6aa5b6b9b83a"
     try:
         return Response(cancelBuy(userid, request.transactionId))
     except Exception as e:
@@ -69,7 +73,7 @@ def cancel_buy(request):
 @logRequest
 @api_view(['POST'])
 def sell(request):
-    userid = "6211857dc98b9aa98bf047a9"
+    userid = "621c2225545c6aa5b6b9b83a"
     amount = request.data.get('amount', False)
     ticker = request.data.get('ticker', False)
     try:
@@ -79,7 +83,7 @@ def sell(request):
 @logRequest
 @api_view(['POST'])
 def commit_sell(request):
-    userid = "6211857dc98b9aa98bf047a9"
+    userid = "621c2225545c6aa5b6b9b83a"
     try:
         return Response(commitSell(userid, request.transactionId))
     except Exception as e:
@@ -87,7 +91,7 @@ def commit_sell(request):
 @logRequest
 @api_view(['POST'])
 def cancel_sell(request):
-    userid = "6211857dc98b9aa98bf047a9"
+    userid = "621c2225545c6aa5b6b9b83a"
     try:
         return Response(cancelSell(userid, request.transactionId))
     except Exception as e:
@@ -96,7 +100,7 @@ def cancel_sell(request):
 @logRequest
 @api_view(['POST'])
 def set_buy_amount(request): 
-    userid = "6211857dc98b9aa98bf047a9"
+    userid = "621c2225545c6aa5b6b9b83a"
     amount = request.data.get('amount', False)
     ticker = request.data.get('ticker', False)
     try:
@@ -106,7 +110,7 @@ def set_buy_amount(request):
 @logRequest
 @api_view(['POST'])
 def cancel_set_buy(request):
-    userid = "6211857dc98b9aa98bf047a9"
+    userid = "621c2225545c6aa5b6b9b83a"
     ticker = request.data.get('ticker', False)
     try:
         return Response(cancelBuyTrigger(userid,ticker,request.transactionId))
@@ -116,7 +120,7 @@ def cancel_set_buy(request):
 @logRequest
 @api_view(['POST'])
 def set_buy_trigger(request):
-    userid = "6211857dc98b9aa98bf047a9"
+    userid = "621c2225545c6aa5b6b9b83a"
     ticker = request.data.get('ticker', False)
     price = request.data.get('price', False)
     try:
@@ -126,7 +130,7 @@ def set_buy_trigger(request):
 @logRequest
 @api_view(['POST'])
 def set_sell_amount(request):
-    userid = "6211857dc98b9aa98bf047a9"
+    userid = "621c2225545c6aa5b6b9b83a"
     amount = request.data.get('amount', False)
     try:
         return Response(setSellAmount(userid, amount, request.transactionId))
@@ -135,7 +139,7 @@ def set_sell_amount(request):
 @logRequest
 @api_view(['POST'])
 def set_sell_trigger(request):
-    userid = "6211857dc98b9aa98bf047a9"
+    userid = "621c2225545c6aa5b6b9b83a"
     price = request.data.get('price', False)
     ticker = request.data.get('ticker', False)
     try:
@@ -145,7 +149,7 @@ def set_sell_trigger(request):
 @logRequest
 @api_view(['POST'])
 def cancel_set_sell(request):
-    userid = "6211857dc98b9aa98bf047a9"
+    userid = "621c2225545c6aa5b6b9b83a"
     ticker = request.data.get('ticker', False)
     try:
         return Response(cancelSellTrigger(userid, ticker,request.transactionId))
@@ -172,7 +176,7 @@ def displaySummary(request):
 @api_view(['POST'])
 def createNewUser(request):
     try:
-        body = request.POST
+        body = request.data
 
         if(createUser(body['name'], body['email'], body['password'])):
             # TODO: log the user in when the account is created
@@ -185,7 +189,7 @@ def createNewUser(request):
 @api_view(['GET'])
 def getUserObj(request):
     try:
-        user = getUser("6211857dc98b9aa98bf047a9")
+        user = getUser("621c2225545c6aa5b6b9b83a")
         print(user)
         return Response(user)
     except Exception as e:
