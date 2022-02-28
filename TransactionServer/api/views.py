@@ -51,7 +51,7 @@ def buy(request):
         return handleViewError(e, request)
 
 @logRequest
-@api_view(['PATCH'])
+@api_view(['POST','PATCH'])
 def commit_buy(request):
     
     userid = "621c2225545c6aa5b6b9b83a"

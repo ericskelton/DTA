@@ -289,7 +289,7 @@ def setBuyTrigger(id, stock, price, transactionId):
         return dbCallWrapper({'_id': id}, {
             '$set': {
                 'pending_trigger': None,
-                'triggers'+'.'+stock: {
+                'buy_triggers'+'.'+stock: {
                     'amount': getUser(id)['pending_trigger']['amount'],
                     'price': price,
                     'userid': id,
