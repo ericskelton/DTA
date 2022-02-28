@@ -20,7 +20,6 @@ def trigger_job():
                 sellStock(trigger['_id'], trigger['sell_triggers'][stock]['amount'], quote, transactionId)
                 commitSell(trigger['_id'], transactionId)
                 triggers_executed += 1
-    endTime = time.time()
             
 
     logJsonObject({'type': 'systemevent', 'event': 'trigger_job_executed',  'triggers_executed': triggers_executed, 'time': str(time.time() - startTime) + ' seconds', 'transactionId': transactionId})

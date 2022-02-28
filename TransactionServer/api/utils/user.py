@@ -190,7 +190,7 @@ def commitSell(id, transactionId):
     user = getUser(id)
     transaction = user['pending_sell']
     if(transaction):
-        if(time.time() - transaction['timestamp'] > 60):
+        if(time.time() - float(transaction['timestamp']) > 60):
             # clear the pending transaction
             dbCallWrapper({'_id': id}, {'$set': {'pending_sell': None}}, func = db.user.update_one)
             raise Exception('Quote expired')
@@ -226,7 +226,7 @@ def commitSell(id, transactionId):
                     '$push':{
                         'transactions': transaction,
                         'stocks.' + transaction['stock'] + '.price': {
-                            -transaction['amount']: transaction['price']
+                            '-' + str(transaction['amount']): transaction['price']
                         }
                     },
                     '$set': {
