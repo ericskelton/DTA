@@ -3,7 +3,7 @@ from functools import partial
 from logging import raiseExceptions
 from pickle import TRUE
 from rest_framework import status
-from rest_framework.generics import RetrieveUpdateAPIView, RetrieveAPIView, UpdateAPIView
+from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -127,8 +127,8 @@ class BuyStockAPIView(APIView):
     def post(self, request):
         user = request.data.get('user', {})
         serializer = self.serializer_class(
-            data=user, 
-            partial=True
+            data=user
+        
         )
         serializer.is_valid(raise_exception=True)
         message = {"message": "buy stock endpoint", "serializer_data":serializer.data}
@@ -142,8 +142,8 @@ class CommitBuyAPIView(APIView):
     def post(self, request):
         user = request.data.get('user', {})
         serializer = self.serializer_class(
-            data=user, 
-            partial=True
+            data=user
+        
         )
         serializer.is_valid(raise_exception=True)
         message = {"message": "commit buy endpoint", "serializer_data":serializer.data}
@@ -157,9 +157,7 @@ class CancelBuyAPIView(APIView):
     def post(self, request):
         user = request.data.get('user', {})
         serializer = self.serializer_class(
-            request.user, 
             data=user, 
-            partial=True
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -174,9 +172,9 @@ class SellStockAPIView(APIView):
     def post(self, request):
         user = request.data.get('user', {})
         serializer = self.serializer_class(
-            request.user, 
-            data=user, 
-            partial=True
+
+            data=user
+
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -195,7 +193,7 @@ class CommitSellAPIView(APIView):
         message = {"message": "commit sell endpoint", "serializer_data":serializer.data}
         return Response(message, status=status.HTTP_200_OK)
 
-class CancelSellAPIView(RetrieveAPIView):
+class CancelSellAPIView(APIView):
     permission_classes = (IsAuthenticated,)
     renderer_classes = (UserJSONRenderer,)
     serializer_class = UsernameSerializer
@@ -203,33 +201,30 @@ class CancelSellAPIView(RetrieveAPIView):
     def post(self, request):
         user = request.data.get('user', {})
         serializer = self.serializer_class(
-            request.user, 
-            data=user, 
-            partial=True
+            data=user
+
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
         message = {"message": "cancel sell endpoint", "serializer_data":serializer.data}
         return Response(message, status=status.HTTP_200_OK)
 
-class SetBuyAmountAPIView(RetrieveAPIView):
+class SetBuyAmountAPIView(APIView):
     permission_classes = (IsAuthenticated,)
     renderer_classes = (UserJSONRenderer,)
     serializer_class = UsernameAmountStockSerializer
 
     def post(self, request):
         user = request.data.get('user', {})
-        serializer = self.serializer_class(
-            request.user, 
-            data=user, 
-            partial=True
+        serializer = self.serializer_class( 
+            data=user
+            
         )
         serializer.is_valid(raise_exception=True)
-        serializer.save()
         message = {"message": "set buy amount endpoint", "serializer_data":serializer.data}
         return Response(message, status=status.HTTP_200_OK)
 
-class CancelSetBuyAPIView(RetrieveAPIView):
+class CancelSetBuyAPIView(APIView):
     permission_classes = (IsAuthenticated,)
     renderer_classes = (UserJSONRenderer,)
     serializer_class = UsernameStockSerializer
@@ -237,12 +232,9 @@ class CancelSetBuyAPIView(RetrieveAPIView):
     def post(self, request):
         user = request.data.get('user', {})
         serializer = self.serializer_class(
-            request.user, 
-            data=user, 
-            partial=True
+            data=user
         )
         serializer.is_valid(raise_exception=True)
-        serializer.save()
         message = {"message": "cancel set buy endpoint", "serializer_data":serializer.data}
         return Response(message, status=status.HTTP_200_OK)
 
@@ -253,17 +245,14 @@ class SetBuyTriggerAPIView(APIView):
 
     def post(self, request):
         user = request.data.get('user', {})
-        serializer = self.serializer_class(
-            request.user, 
-            data=user, 
-            partial=True
+        serializer = self.serializer_class( 
+            data=user
         )
         serializer.is_valid(raise_exception=True)
-        serializer.save()
         message = {"message": "set buy trigger endpoint", "serializer_data":serializer.data}
         return Response(message, status=status.HTTP_200_OK)
 
-class SetSellAmountAPIView(RetrieveAPIView):
+class SetSellAmountAPIView(APIView):
     permission_classes = (IsAuthenticated,)
     renderer_classes = (UserJSONRenderer,)
     serializer_class = UsernameAmountStockSerializer
@@ -271,12 +260,9 @@ class SetSellAmountAPIView(RetrieveAPIView):
     def post(self, request):
         user = request.data.get('user', {})
         serializer = self.serializer_class(
-            request.user, 
-            data=user, 
-            partial=True
+            data=user
         )
         serializer.is_valid(raise_exception=True)
-        serializer.save()
         message = {"message": "set sell amount endpoint", "serializer_data":serializer.data}
         return Response(message, status=status.HTTP_200_OK)
 
@@ -288,12 +274,9 @@ class SetSellTriggerAPIView(APIView):
     def post(self, request):
         user = request.data.get('user', {})
         serializer = self.serializer_class(
-            request.user, 
             data=user, 
-            partial=True
         )
         serializer.is_valid(raise_exception=True)
-        serializer.save()
         message = {"message": "set sell trigger endpoint", "serializer_data":serializer.data}
         return Response(message, status=status.HTTP_200_OK)
 
@@ -305,12 +288,11 @@ class CancelSellSetAPIView(APIView):
     def post(self, request):
         user = request.data.get('user', {})
         serializer = self.serializer_class(
-            request.user, 
-            data=user, 
-            partial=True
+
+            data=user
+
         )
         serializer.is_valid(raise_exception=True)
-        serializer.save()
         message = {"message": "set sell trigger endpoint", "serializer_data":serializer.data}
         return Response(message, status=status.HTTP_200_OK)
 
@@ -322,7 +304,7 @@ class DumpLogAPIVeiw(APIView):
 
     def retrieve(self, request):
         params = request.query_params
-        serializer = self.serializer_class(params)
+        serializer = self.serializer_class(data=params)
         serializer.is_valid(raise_exception=True)
         message = {"message": "dunmplog endpoint", "serializer_data": serializer.data}
         return Response(message, status=status.HTTP_200_OK)
@@ -330,9 +312,9 @@ class DumpLogAPIVeiw(APIView):
     def post(self, request):
         user = request.data.get('user', {})
         serializer = self.serializer_class(
-            request.user, 
-            data=user, 
-            partial=True
+
+            data=user
+        
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -344,7 +326,7 @@ class DisplaySummary(APIView):
     renderer_classes = (UserJSONRenderer,)
     serializer_class = UsernameSerializer
     
-    def retreive(self, request):
+    def get(self, request):
         user = request.data.query_params
         serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)
