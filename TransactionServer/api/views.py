@@ -18,11 +18,11 @@ def quote(request, **kwargs):
     ticker = kwargs.get('ticker')
     if ticker is None:
         ticker = request.GET.get('ticker')
-    if ticker is None:
-        raise Exception('No ticker specified')
     try:
         if ticker is None:
-            raise Exception("ticker not specified")
+            raise Exception('No ticker specified')
+    
+        
         return Response(getQuote(ticker, userId,request.transactionId))
     except Exception as e:
         return handleViewError(e, request)

@@ -1,6 +1,6 @@
 from api.utils.user import getTriggers, buyStock, sellStock, commitBuy, commitSell
 from utils.quoteServer import getQuote
-from api.utils.log import *
+from api.utils.db import logJsonObject
 import time
 def trigger_job():
     triggers = getTriggers()
@@ -27,3 +27,5 @@ def trigger_job():
     return
 
 
+if __name__ == '__main__':
+    trigger_job()
