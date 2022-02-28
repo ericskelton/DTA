@@ -4,8 +4,8 @@ from api.utils.db import logJsonObject
 import time
 def trigger_job():
     triggers = getTriggers()
-    sell_triggers = triggers['sell_triggers']
-    buy_triggers = triggers['buy_triggers']
+    sell_triggers = triggers.get('sell_triggers', {})
+    buy_triggers = triggers.get('buy_triggers', {})
     transactionId = logJsonObject({'type': 'systemEvent', 'event': 'trigger_job', 'server': 'transactionserver', 'timestamp': str(int(time.time()))})
     startTime = time.time()
     triggers_executed = 0
