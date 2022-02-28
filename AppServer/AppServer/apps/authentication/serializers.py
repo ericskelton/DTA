@@ -103,9 +103,9 @@ class UsernameSerializer(serializers.Serializer):
             )
         return { "username": username}
     
-    def update(self, instance, validated_data):
+    def update(self, validated_data):
         """Performs an update on a User."""
-        return instance
+        return "MESSAGE"
         
 class UsernameStockSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=255, required=True)

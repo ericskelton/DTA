@@ -105,6 +105,8 @@ class AddAPIView(RetrieveUpdateAPIView):
         serializer = self.serializer_class(data=user, partial=True)
         serializer.is_valid(raise_exception=True)
         message = {"message": "add amount endpoint", "serializer_data":serializer.data}
+        payload
+        r = requests
         return Response(message, status=status.HTTP_200_OK)
 
 class QuoteAPIView(APIView):
@@ -205,7 +207,6 @@ class CancelSellAPIView(APIView):
 
         )
         serializer.is_valid(raise_exception=True)
-        serializer.save()
         message = {"message": "cancel sell endpoint", "serializer_data":serializer.data}
         return Response(message, status=status.HTTP_200_OK)
 
