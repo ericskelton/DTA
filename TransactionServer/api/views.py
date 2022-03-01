@@ -48,6 +48,11 @@ def buy(request):
     ticker = request.data.get('ticker', False)
     amount = request.data.get('amount', False)
     try: 
+        if ticker == False: 
+            raise Exception('No ticker specified')
+        if amount == False:
+            raise Exception('No amount specified')
+    
         return Response(buyStock(username, amount,getQuote(ticker,username, request.transactionId), request.transactionId))
     except Exception as e:
         return handleViewError(e, request)

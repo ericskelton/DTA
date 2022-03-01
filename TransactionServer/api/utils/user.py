@@ -68,6 +68,7 @@ def buyStock(username, amount, quote, transactionId):
     timestamp = quote['timestamp']
     cryptographicKey = quote['cryptographicKey']
     user = getUser(username)
+    amount = float(amount)
     # check if the user has enough balance to buy
     if(user['balance'] >= amount * price):
 
@@ -98,7 +99,7 @@ def commitBuy(username, transactionId):
     user = getUser(username)
     transaction = user['pending_buy']
     if(transaction):
-        if(float(time.time()) - float(transaction['timestamp']) > 60):
+        if(int(time.time() * 1000) - float(transaction['timestamp']) > 60000):
             # clear the pending transaction
             db.user.update_one({'username': username}, {'$set': {'pending_buy': None}})
             raise Exception('Quote expired')

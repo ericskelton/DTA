@@ -8,7 +8,7 @@ db, client = getDb()
 def trigger_job():
     triggers = getTriggers()
     transactionId = logJsonObject({'type': 'systemEvent', 'event': 'trigger_job', 'server': 'transactionserver', 'timestamp': str(int(time.time()))})
-    startTime = time.time()
+    startTime = int(time.time() * 1000)
     triggers_executed = 0
     for trigger in triggers:
         for stock in trigger['buy_triggers'].keys():
