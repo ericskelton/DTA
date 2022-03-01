@@ -90,7 +90,7 @@ def buyStock(username, amount, quote, transactionId):
             'price': price,
             'timestamp': timestamp,
         }
-    raise Exception('Insufficient balance, stock is {}, price is {}, amount is {}'.format(stock, str(price), str(amount)))
+    raise Exception('Insufficient balance, stock is {}, price is {}, amount is {}, balance is {}, total price is {}'.format(stock, str(price), str(amount), str(user['balance']), str(amount * price)))
 
 # removes the pending buy
 # adds the transaction to the transactions list
