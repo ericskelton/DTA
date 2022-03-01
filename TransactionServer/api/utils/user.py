@@ -154,9 +154,10 @@ def sellStock(username, amount, quote, transactionId):
     stock = quote['ticker']
     timestamp = quote['timestamp']
     cryptographicKey = quote['cryptographicKey']
-
+    if(stock not in user['stocks'].keys()):
+        raise Exception('Stock not owned')
     # check if the user has enough of the stock to sell
-    if(stock in user['stocks'].keys() and user['stocks'][stock]['amount'] >= amount):
+    if(stock in user['stocks'].keys() and user['stocks'][stock]['amount'] >= float(amount)):
        
         # set the transaction to the user's pending transaction
         dbCallWrapper(
