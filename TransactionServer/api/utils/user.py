@@ -309,7 +309,7 @@ def setSellTrigger(username, stock, price, transactionId):
     raise Exception('No pending trigger')
 def cancelSellTrigger(username, stock, transactionId):
     user = getUser(username)
-    if(user['sell_triggers'][stock] and user['triggers'][stock]['type'] == 'sell'):
+    if(user['sell_triggers'][stock] and user['sell_triggers'][stock]['type'] == 'sell'):
         return dbCallWrapper({'username': username}, {
             '$set': {
                 'sell_triggers.' + stock: None
