@@ -19,7 +19,7 @@ from .views import (
     SetBuyTriggerAPIView,
     SetSellAmountAPIView,
     SetSellTriggerAPIView,
-    CancelSellSetAPIView,
+    CancelSetSellAPIView,
     DumpLogAPIVeiw,
     DisplaySummary,
     DumpLogAdminAPIVeiw
@@ -44,7 +44,7 @@ urlpatterns = [
     path('setbuytrigger/', SetBuyTriggerAPIView.as_view()),
     path('setsellamount/', SetSellAmountAPIView.as_view()),
     path('setselltrigger/', SetSellTriggerAPIView.as_view()),
-    path('cancelsetsell/', CancelSellSetAPIView.as_view()),
+    path('cancelsetsell/', CancelSetSellAPIView.as_view()),
     path('dumplog', DumpLogAPIVeiw.as_view()),
     path('displaysummary', DisplaySummary.as_view()),
     path('dumpnlogadmin', DumpLogAdminAPIVeiw.as_view()),

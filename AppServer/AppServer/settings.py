@@ -140,5 +140,6 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'AppServer.apps.authentication.backends.JWTAuthentication',
     ),
+   
 }
 django_heroku.settings(locals())
