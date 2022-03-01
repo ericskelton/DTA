@@ -31,7 +31,7 @@ def trigger_job():
                 triggers_executed += 1
             
 
-    logJsonObject({'type': 'systemevent', 'event': 'trigger_job_executed',  'triggers_executed': triggers_executed, 'time': str(time.time() - startTime) + ' seconds', 'transactionId': transactionId})
+    logJsonObject({'type': 'systemevent', 'event': 'trigger_job_executed',  'triggers_executed': triggers_executed, 'time': str(time.time() - startTime) + ' milliseconds', 'transactionId': transactionId})
 
     return
 
