@@ -71,7 +71,10 @@ def dbCallWrapper(*args, **kwargs):
     else:
         eventLog = False
     dbfunc = kwargs['func']
-
+    if "except_on_not_found" in kwargs.keys():
+        except_on_not_found = kwargs['except_on_not_found']
+    else:
+        except_on_not_found = False
     queryResults = dbfunc(*args)
     print(queryResults)
     if isinstance(eventLog, dict):
@@ -80,5 +83,7 @@ def dbCallWrapper(*args, **kwargs):
 
         results = serializeDbResults(queryResults)
         return results
-    else:
+    elif except_on_not_found:
         raise Exception('Error: No results returned from database')
+    else:
+        return False
