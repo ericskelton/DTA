@@ -26,9 +26,9 @@ def logRequest(view):
         timestamp = str(int(time.time()))	
         # Get the username
         # user = request.user.username
-        user = "621c2225545c6aa5b6b9b83a" if env('HARD_CODED_USER') else request.user.id	
+        user = "test" if env('HARD_CODED_USER') else request.user.id	
         # Get the command name
-        command = request.path.split('/')[-1]	
+        command = request.path.split('/')[-2]	
         # Get the parameters	
         # Create the JSON
         json = {
@@ -42,9 +42,8 @@ def logRequest(view):
         json.update(request.POST.dict())		
         request.transactionId = dbCallWrapper(json, func = db.log.insert_one)
         
-        try:
-            return view(request, **kwargs)
-        except Exception as e:
-            return handleViewError(e, request)
+        
+        return view(request, **kwargs)
+        
     return wrapper
 

@@ -30,7 +30,7 @@ def logError(exception, request):
         return
 
     # Get the current timestamp
-    timestamp = str(int(time.time()))
+    timestamp = int(time.time() * 1000)
 
     # Get the error message
     errorMessage = exception.args[0]
@@ -72,7 +72,6 @@ def handleViewError(exception, request):
         'InvalidUser': status.HTTP_400_BAD_REQUEST,
         'InvalidUserStatus': status.HTTP_400_BAD_REQUEST,
     }
-    raise exception
     return Response(
         {'error': exception.args[0]},
         status= statuses[exception.args[0]] if exception.args[0] in statuses else status.HTTP_400_BAD_REQUEST

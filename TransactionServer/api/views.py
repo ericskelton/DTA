@@ -13,7 +13,7 @@ from api.utils.log import logRequest
 @logRequest
 @api_view(['GET'])
 def quote(request, **kwargs):
-    userId = "621c2225545c6aa5b6b9b83a"
+    username = "test"
     # TODO: redis this, then have the buy and sell commands use the redis cache before hitting the quote server
     ticker = kwargs.get('ticker')
     if ticker is None:
@@ -23,144 +23,162 @@ def quote(request, **kwargs):
             raise Exception('No ticker specified')
     
         
-        return Response(getQuote(ticker, userId,request.transactionId))
+        return Response(getQuote(ticker, username,request.transactionId))
     except Exception as e:
         return handleViewError(e, request)
-    
+
+@csrf_exempt
 @logRequest
 @api_view(['POST', 'PATCH'])
 def add(request):
      
     
-    userId = "621c2225545c6aa5b6b9b83a"
+    username = "test"
     amount = request.data.get('amount', False) 
     try:
-        return Response(addBalance(userId, amount, request.transactionId))
-    except Exception as e:
-        return handleViewError(e, request)
-                 
-@logRequest
-@api_view(['POST'])
-def buy(request):
-    userid = "621c2225545c6aa5b6b9b83a"
-    ticker = request.data.get('ticker', False)
-    amount = request.data.get('amount', False)
-    try: 
-        return Response(buyStock(userid, amount,getQuote(ticker,userid, request.transactionId), request.transactionId))
+        return Response(addBalance(username, amount, request.transactionId))
     except Exception as e:
         return handleViewError(e, request)
 
+@csrf_exempt               
 @logRequest
-@api_view(['PATCH'])
+@api_view(['POST'])
+def buy(request):
+    username = "test"
+    ticker = request.data.get('ticker', False)
+    amount = request.data.get('amount', False)
+    try: 
+        if ticker == False: 
+            raise Exception('No ticker specified')
+        if amount == False:
+            raise Exception('No amount specified')
+    
+        return Response(buyStock(username, amount,getQuote(ticker,username, request.transactionId), request.transactionId))
+    except Exception as e:
+        return handleViewError(e, request)
+
+@csrf_exempt
+@logRequest
+@api_view(['POST','PATCH'])
 def commit_buy(request):
     
-    userid = "621c2225545c6aa5b6b9b83a"
+    username = "test"
     try:
-        return Response(commitBuy(userid, request.transactionId))
+        return Response(commitBuy(username, request.transactionId))
     except Exception as e:
         return handleViewError(e, request)
          
 
+@csrf_exempt
 @logRequest
 @api_view(['POST'])
 def cancel_buy(request): 
-    userid = "621c2225545c6aa5b6b9b83a"
+    username = "test"
     try:
-        return Response(cancelBuy(userid, request.transactionId))
+        return Response(cancelBuy(username, request.transactionId))
     except Exception as e:
         return handleViewError(e, request)
 
+@csrf_exempt
 @logRequest
 @api_view(['POST'])
 def sell(request):
-    userid = "621c2225545c6aa5b6b9b83a"
+    username = "test"
     amount = request.data.get('amount', False)
     ticker = request.data.get('ticker', False)
     try:
-        return Response(sellStock(userid, amount, getQuote(ticker, userid, request.transactionId), request.transactionId))
+        return Response(sellStock(username, amount, getQuote(ticker, username, request.transactionId), request.transactionId))
     except Exception as e:
         return handleViewError(e, request)
+@csrf_exempt
 @logRequest
 @api_view(['POST'])
 def commit_sell(request):
-    userid = "621c2225545c6aa5b6b9b83a"
+    username = "test"
     try:
-        return Response(commitSell(userid, request.transactionId))
+        return Response(commitSell(username, request.transactionId))
     except Exception as e:
         return handleViewError(e, request)
+@csrf_exempt
 @logRequest
 @api_view(['POST'])
 def cancel_sell(request):
-    userid = "621c2225545c6aa5b6b9b83a"
+    username = "test"
     try:
-        return Response(cancelSell(userid, request.transactionId))
+        return Response(cancelSell(username, request.transactionId))
     except Exception as e:
         return handleViewError(e, request)
 
+@csrf_exempt
 @logRequest
 @api_view(['POST'])
 def set_buy_amount(request): 
-    userid = "621c2225545c6aa5b6b9b83a"
+    username = "test"
     amount = request.data.get('amount', False)
     ticker = request.data.get('ticker', False)
     try:
-        return Response(setBuyAmount(userid, ticker,amount, request.transactionId))
+        return Response(setBuyAmount(username, ticker,amount, request.transactionId))
     except Exception as e:
         return handleViewError(e, request)
+@csrf_exempt
 @logRequest
 @api_view(['POST'])
 def cancel_set_buy(request):
-    userid = "621c2225545c6aa5b6b9b83a"
+    username = "test"
     ticker = request.data.get('ticker', False)
     try:
-        return Response(cancelBuyTrigger(userid,ticker,request.transactionId))
+        return Response(cancelBuyTrigger(username,ticker,request.transactionId))
     except Exception as e:
         return handleViewError(e, request)
 
+@csrf_exempt
 @logRequest
 @api_view(['POST'])
 def set_buy_trigger(request):
-    userid = "621c2225545c6aa5b6b9b83a"
+    username = "test"
     ticker = request.data.get('ticker', False)
     price = request.data.get('price', False)
     try:
-        return Response(setBuyTrigger(userid, ticker, price,request.transactionId))
+        return Response(setBuyTrigger(username, ticker, price,request.transactionId))
     except Exception as e:
         return handleViewError(e, request)
+@csrf_exempt
 @logRequest
 @api_view(['POST'])
 def set_sell_amount(request):
-    userid = "621c2225545c6aa5b6b9b83a"
+    username = "test"
     amount = request.data.get('amount', False)
     try:
-        return Response(setSellAmount(userid, amount, request.transactionId))
+        return Response(setSellAmount(username, amount, request.transactionId))
     except Exception as e:
         return handleViewError(e, request)
+@csrf_exempt
 @logRequest
 @api_view(['POST'])
 def set_sell_trigger(request):
-    userid = "621c2225545c6aa5b6b9b83a"
+    username = "test"
     price = request.data.get('price', False)
     ticker = request.data.get('ticker', False)
     try:
-        return Response(setSellTrigger(userid, ticker, price, request.transactionId))
+        return Response(setSellTrigger(username, ticker, price, request.transactionId))
     except Exception as e:
         return handleViewError(e, request)
+@csrf_exempt
 @logRequest
 @api_view(['POST'])
 def cancel_set_sell(request):
-    userid = "621c2225545c6aa5b6b9b83a"
+    username = "test"
     ticker = request.data.get('ticker', False)
     try:
-        return Response(cancelSellTrigger(userid, ticker,request.transactionId))
+        return Response(cancelSellTrigger(username, ticker,request.transactionId))
     except Exception as e:
         return handleViewError(e, request)
 @logRequest
 @api_view(['GET'])
 def dumplog(request):
     try:
-        if 'userid' in request.GET.keys():
-            return Response(dumplogXML(request.GET['userid']))
+        if 'username' in request.GET.keys():
+            return Response(dumplogXML(request.GET['username']))
         return Response(dumplogXML())
     except Exception as e:
         return handleViewError(e, request)
@@ -169,7 +187,11 @@ def dumplog(request):
 @logRequest
 @api_view(['GET'])
 def displaySummary(request):  
-    return Response("not implemented")
+    try:
+        username = 'test'
+        return Response(displayUserSummary(username))
+    except Exception as e:
+        return handleViewError(e, request)
     
 
 @csrf_exempt
@@ -178,7 +200,7 @@ def createNewUser(request):
     try:
         body = request.data
 
-        if(createUser(body['name'], body['email'], body['password'])):
+        if(createUser(body['name'], body['username'], body['password'])):
             # TODO: log the user in when the account is created
             return Response("User created")
         
@@ -189,7 +211,7 @@ def createNewUser(request):
 @api_view(['GET'])
 def getUserObj(request):
     try:
-        user = getUser("621c2225545c6aa5b6b9b83a")
+        user = getUser("test")
         print(user)
         return Response(user)
     except Exception as e:

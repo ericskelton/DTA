@@ -1,7 +1,8 @@
 import socket
-from api.utils.log import *
+from api.utils.db import *
+import time
 import random
-
+db, client = getDb()
 def getQuote(ticker, userid, transactionId):
     #try:
     #    HOST = '192.168.4.2'
@@ -35,17 +36,36 @@ def getQuote(ticker, userid, transactionId):
     #    }
     #except Exception as e:
         randomFloat = (random.uniform(0, 1) * 250) + 50
+        randomFloat = float(str(randomFloat).split('.')[0] +'.' + str(randomFloat).split('.')[1][:2])
         # generate random key
         from key_generator.key_generator import generate
-
-        key = generate(seed = randomFloat//1)
-        return {
+        current_time = int(time.time() * 1000)
+        key = generate(seed = randomFloat//1).get_key()
+        print(key)
+        quote = dbCallWrapper({"type": "quoteServer", "ticker": ticker, 'timestamp': {"$gt": current_time - 60000}}, func = db.log.find_one)
+        if quote:
+            key = quote['cryptographicKey']
+            quote = quote['price']
+        
+        randomFloat = quote if quote else randomFloat
+        fetchType = 'quoteServer' if not quote else 'quote_cache'
+        
+        logJsonObject({
             'ticker': ticker,
-            # random value from 50 to 300
             'price': randomFloat,
             'username': userid,
-            'timestamp': str(int(time.time())),
-            'cryptographicKey': key.get_key(),
+            'timestamp': current_time,
+            'cryptographicKey': key,
+            'type': fetchType,
+            'transactionId': transactionId
+        })
+        return {
+            'ticker': ticker,
+            # random value from 50 to 300, rounded to 2 decimal places its real ugly i know
+            'price': randomFloat,
+            'username': userid,
+            'timestamp': current_time,
+            'cryptographicKey': key,
         }
 
 
