@@ -190,16 +190,11 @@ class UsernameAmountStockSerializer(serializers.Serializer):
 
 class UsernameDumplogSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=255, required=False)
-    filename = serializers.CharField(max_length=255, required=True)
 
     def validate(self, data):
         username = data.get('username', None)
         filename = data.get("filename", None)
 
-        if filename is None:
-            raise serializers.ValidationError(
-                'A filename is required'
-            )
         if username is None:
             raise serializers.ValidationError(
                 'A username is required'
