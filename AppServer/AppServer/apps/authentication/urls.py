@@ -21,7 +21,8 @@ from .views import (
     SetSellTriggerAPIView,
     CancelSellSetAPIView,
     DumpLogAPIVeiw,
-    DisplaySummary
+    DisplaySummary,
+    DumpLogAdminAPIVeiw
     )
 
 app_name = 'authentication'
@@ -45,6 +46,7 @@ urlpatterns = [
     path('setselltrigger/', SetSellTriggerAPIView.as_view()),
     path('cancelsetsell/', CancelSellSetAPIView.as_view()),
     path('dumplog', DumpLogAPIVeiw.as_view()),
-    path('displaysummary', DisplaySummary.as_view())
+    path('displaysummary', DisplaySummary.as_view()),
+    path('dumpnlogadmin', DumpLogAdminAPIVeiw.as_view()),
 
 ]

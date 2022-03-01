@@ -198,6 +198,10 @@ class UsernameDumplogSerializer(serializers.Serializer):
 
         if filename is None:
             raise serializers.ValidationError(
+                'A filename is required'
+            )
+        if username is None:
+            raise serializers.ValidationError(
                 'A username is required'
             )
         return { "username": username, "filename": filename}
@@ -207,6 +211,16 @@ class UsernameDumplogSerializer(serializers.Serializer):
         print ("validated data is: ", validated_data.items())
        
         return "updated data"
+
+class DumplogSerializer(serializers.Serializer):
+    filename = serializers.CharField(max_length=255, required=True)
+    def validate(self, data):
+        filename = data.get("filename", None)
+        if filename is None:
+                raise serializers.ValidationError(
+                    'A filename is required'
+                )
+        return { "filename": filename}
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=255)

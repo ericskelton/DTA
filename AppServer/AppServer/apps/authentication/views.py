@@ -4,7 +4,7 @@ from logging import raiseExceptions
 from pickle import TRUE
 from rest_framework import status
 from rest_framework.generics import RetrieveUpdateAPIView
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .renderers import UserJSONRenderer
@@ -20,7 +20,8 @@ from .serializers import (
     UsernameSerializer,
     UsernameStockSerializer,
     UsernameDumplogSerializer,
-    UsernameAmountSerializer
+    UsernameAmountSerializer,
+    DumplogSerializer
 
 )
 
@@ -294,28 +295,29 @@ class CancelSellSetAPIView(APIView):
 
 #get probably
 class DumpLogAPIVeiw(APIView):
-    permission_classes = (DumplogPermissions,)
+    permission_classes = (IsAuthenticated,)
     renderer_classes = (UserJSONRenderer,)
     serializer_class = UsernameDumplogSerializer
 
-    def retrieve(self, request):
+    def get(self, request):
+        params = request.query_params
+        serializer = self.serializer_class(data=params)
+        serializer.is_valid(raise_exception=True)
+        message = {"message": "dunmplog endpoint", "serializer_data": serializer.data}
+        return Response(message, status=status.HTTP_200_OK)
+
+class DumpLogAdminAPIVeiw(APIView):
+    permission_classes = (IsAdminUser,)
+    renderer_classes = (UserJSONRenderer,)
+    serializer_class = DumplogSerializer
+
+    def get(self, request):
         params = request.query_params
         serializer = self.serializer_class(data=params)
         serializer.is_valid(raise_exception=True)
         message = {"message": "dunmplog endpoint", "serializer_data": serializer.data}
         return Response(message, status=status.HTTP_200_OK)
     
-    def post(self, request):
-        user = request.data.get('user', {})
-        serializer = self.serializer_class(
-
-            data=user
-        
-        )
-        serializer.is_valid(raise_exception=True)
-        message = {"message": "dump log for admin", "serializer_data":serializer.data}
-        return Response(message, status=status.HTTP_200_OK)
-
 class DisplaySummary(APIView):
     permission_classes = (IsAuthenticated,)
     renderer_classes = (UserJSONRenderer,)
