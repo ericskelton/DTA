@@ -26,7 +26,8 @@ def quote(request, **kwargs):
         return Response(getQuote(ticker, username,request.transactionId))
     except Exception as e:
         return handleViewError(e, request)
-    
+
+@csrf_exempt
 @logRequest
 @api_view(['POST', 'PATCH'])
 def add(request):
@@ -38,7 +39,8 @@ def add(request):
         return Response(addBalance(username, amount, request.transactionId))
     except Exception as e:
         return handleViewError(e, request)
-                 
+
+@csrf_exempt               
 @logRequest
 @api_view(['POST'])
 def buy(request):
@@ -50,6 +52,7 @@ def buy(request):
     except Exception as e:
         return handleViewError(e, request)
 
+@csrf_exempt
 @logRequest
 @api_view(['POST','PATCH'])
 def commit_buy(request):
@@ -61,6 +64,7 @@ def commit_buy(request):
         return handleViewError(e, request)
          
 
+@csrf_exempt
 @logRequest
 @api_view(['POST'])
 def cancel_buy(request): 
@@ -70,6 +74,7 @@ def cancel_buy(request):
     except Exception as e:
         return handleViewError(e, request)
 
+@csrf_exempt
 @logRequest
 @api_view(['POST'])
 def sell(request):
@@ -80,6 +85,7 @@ def sell(request):
         return Response(sellStock(username, amount, getQuote(ticker, username, request.transactionId), request.transactionId))
     except Exception as e:
         return handleViewError(e, request)
+@csrf_exempt
 @logRequest
 @api_view(['POST'])
 def commit_sell(request):
@@ -88,6 +94,7 @@ def commit_sell(request):
         return Response(commitSell(username, request.transactionId))
     except Exception as e:
         return handleViewError(e, request)
+@csrf_exempt
 @logRequest
 @api_view(['POST'])
 def cancel_sell(request):
@@ -97,6 +104,7 @@ def cancel_sell(request):
     except Exception as e:
         return handleViewError(e, request)
 
+@csrf_exempt
 @logRequest
 @api_view(['POST'])
 def set_buy_amount(request): 
@@ -107,6 +115,7 @@ def set_buy_amount(request):
         return Response(setBuyAmount(username, ticker,amount, request.transactionId))
     except Exception as e:
         return handleViewError(e, request)
+@csrf_exempt
 @logRequest
 @api_view(['POST'])
 def cancel_set_buy(request):
@@ -117,6 +126,7 @@ def cancel_set_buy(request):
     except Exception as e:
         return handleViewError(e, request)
 
+@csrf_exempt
 @logRequest
 @api_view(['POST'])
 def set_buy_trigger(request):
@@ -127,6 +137,7 @@ def set_buy_trigger(request):
         return Response(setBuyTrigger(username, ticker, price,request.transactionId))
     except Exception as e:
         return handleViewError(e, request)
+@csrf_exempt
 @logRequest
 @api_view(['POST'])
 def set_sell_amount(request):
@@ -136,6 +147,7 @@ def set_sell_amount(request):
         return Response(setSellAmount(username, amount, request.transactionId))
     except Exception as e:
         return handleViewError(e, request)
+@csrf_exempt
 @logRequest
 @api_view(['POST'])
 def set_sell_trigger(request):
@@ -146,6 +158,7 @@ def set_sell_trigger(request):
         return Response(setSellTrigger(username, ticker, price, request.transactionId))
     except Exception as e:
         return handleViewError(e, request)
+@csrf_exempt
 @logRequest
 @api_view(['POST'])
 def cancel_set_sell(request):
