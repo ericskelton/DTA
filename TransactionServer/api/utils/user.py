@@ -347,3 +347,7 @@ def dumplogXML(username = None):
     new_docs += '</log>'
     return new_docs
             
+
+def displayUserSummary(username):
+    user = getUser(username)
+    return {'username': user['username'], 'balance': user['balance'], 'stocks': user['stocks'], 'triggers': user['buy_triggers'].update(user['sell_triggers']), 'transactions': user['transactions']}

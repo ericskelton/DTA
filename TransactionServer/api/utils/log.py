@@ -26,7 +26,7 @@ def logRequest(view):
         timestamp = str(int(time.time()))	
         # Get the username
         # user = request.user.username
-        user = "621c2225545c6aa5b6b9b83a" if env('HARD_CODED_USER') else request.user.id	
+        user = "test" if env('HARD_CODED_USER') else request.user.id	
         # Get the command name
         command = request.path.split('/')[-2]	
         # Get the parameters	

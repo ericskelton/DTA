@@ -169,7 +169,11 @@ def dumplog(request):
 @logRequest
 @api_view(['GET'])
 def displaySummary(request):  
-    return Response("not implemented")
+    try:
+        username = 'test'
+        return Response(displayUserSummary(username))
+    except Exception as e:
+        return handleViewError(e, request)
     
 
 @csrf_exempt
