@@ -41,8 +41,8 @@ def getQuote(ticker, userid, transactionId):
         key = generate(seed = randomFloat//1)
         return {
             'ticker': ticker,
-            # random value from 50 to 300
-            'price': randomFloat,
+            # random value from 50 to 300, rounded to 2 decimal places its real ugly i know
+            'price': float(str(randomFloat).split('.')[0] +'.' + str(randomFloat).split('.')[1][:2]),
             'username': userid,
             'timestamp': str(int(time.time())),
             'cryptographicKey': key.get_key(),
