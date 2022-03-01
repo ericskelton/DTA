@@ -82,7 +82,7 @@ def buyStock(username, amount, quote, transactionId):
                     'cryptographicKey': cryptographicKey
                 }
             }
-        }, func = db.user.update_one, eventLog = {'type': 'debugEvent', 'username': str(username), timestamp: int(time.time()), 'action': 'BUY', 'stock': stock, 'amount': amount, 'price': price, 'cryptographicKey': cryptographicKey, 'transactionId': transactionId})
+        }, func = db.user.update_one, eventLog = {'type': 'debugEvent', 'username': str(username), 'timestamp': timestamp, 'action': 'BUY', 'stock': stock, 'amount': amount, 'price': price, 'cryptographicKey': cryptographicKey, 'transactionId': transactionId})
         return {
             'stock': stock,
             'amount': amount,
@@ -171,7 +171,7 @@ def sellStock(username, amount, quote, transactionId):
                 }
             }, 
             func = db.user.update_one,
-            eventLog = {'type': 'debugEvent', 'username': str(username), 'timestamp': int(time.time()), 'action': 'SELL', 'stock': stock, 'amount': amount, 'price': price, 'cryptographicKey': cryptographicKey, 'transactionId': transactionId}
+            eventLog = {'type': 'debugEvent', 'username': str(username), 'timestamp': timestamp, 'action': 'SELL', 'stock': stock, 'amount': amount, 'price': price, 'cryptographicKey': cryptographicKey, 'transactionId': transactionId}
         )
         return True
     raise Exception('Insufficient stock')
