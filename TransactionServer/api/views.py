@@ -148,8 +148,9 @@ def set_buy_trigger(request):
 def set_sell_amount(request):
     username = "test"
     amount = request.data.get('amount', False)
+    ticker = request.data.get('ticker', False)
     try:
-        return Response(setSellAmount(username, amount, request.transactionId))
+        return Response(setSellAmount(username, ticker, amount, request.transactionId))
     except Exception as e:
         return handleViewError(e, request)
 @csrf_exempt
