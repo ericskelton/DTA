@@ -312,7 +312,7 @@ def cancelSellTrigger(username, stock, transactionId):
     if(user['sell_triggers'][stock] and user['triggers'][stock]['type'] == 'sell'):
         return dbCallWrapper({'username': username}, {
             '$set': {
-                'triggers.' + stock: None
+                'sell_triggers.' + stock: None
             }
         }, func = db.user.update_one, eventLog={'type': 'debugEvent', 'username': str(username), 'timestamp': int(time.time()), 'action': 'CANCEL_SELL_TRIGGER', 'stock': stock, 'transactionId': transactionId})
     raise Exception('No active sell trigger on specified stock')
@@ -322,7 +322,7 @@ def cancelBuyTrigger(username, stock, transactionId):
     if(user['buy_triggers'][stock] and user['buy_triggers'][stock]['type'] == 'buy'):
         return dbCallWrapper({'username': username}, {
             '$set': {
-                'triggers.' + stock: None
+                'buy_triggers.' + stock: None
             }
         }, func = db.user.update_one, eventLog = {'type': 'debugEvent', 'username': str(username), 'timestamp': int(time.time()), 'action': 'CANCEL_SELL_TRIGGER', 'stock': stock, 'transactionId': transactionId})
 
