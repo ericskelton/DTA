@@ -28,7 +28,7 @@ def logRequest(view):
         # get the last transactionNum from the database
         transactionNum = db.log.find_one({'type': 'userCommand'}, {'transactionNum': 1}, sort=[('_id', pymongo.DESCENDING)])
         
-        transactionNum = transactionNum['transactionNum'] + 1 if 'transactionNum' in transactionNum.keys() else 1
+        transactionNum = transactionNum['transactionNum'] + 1 if transactionNum and 'transactionNum' in transactionNum.keys() else 1
         # Get the username
         # user = request.user.username
         user = "test" if env('HARD_CODED_USER') else request.user.id	
