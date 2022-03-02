@@ -350,7 +350,7 @@ def dumplogXML(username = None):
                 new_docs += '\t\t<funds>'+str(doc[key])+'</funds>\n'
             elif key == 'command':
                 new_docs += '\t\t<command>'+doc[key].upper()+'</command>\n'
-            if key != 'type' and key != '_id' and key != 'transactionId':
+            elif key != 'type' and key != '_id' and key != 'transactionId':
                 new_docs += '\t\t<'+key+'>'+str(doc[key])+'</'+key+'>\n'
         new_docs += '\t</'+doc['type']+'>\n'
     new_docs += '</log>'
