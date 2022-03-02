@@ -7,8 +7,11 @@ db, client = getDb()
 
 def trigger_job():
     triggers = getTriggers()
-    transactionId = logJsonObject({'type': 'systemEvent', 'event': 'trigger_job', 'server': 'transactionserver', 'timestamp': str(int(time.time()))})
-    startTime = int(time.time() * 1000)
+    transactionNum = db.log.find_one({'type': 'userCommand'}, {'transactionNum': 1}, sort=[('_id', pymongo.DESCENDING)])
+    startTime = int(time.time() * 1000)  
+    transactionNum = transactionNum['transactionNum'] + 1 if 'transactionNum' in transactionNum.keys() else 1
+    logJsonObject({'type': 'systemEvent', 'event': 'trigger_job', 'server': 'transactionserver', 'timestamp': startTime, 'transactionNum': transactionNum})
+    transactionId = transactionNum
     triggers_executed = 0
     for trigger in triggers:
         for stock in trigger['buy_triggers'].keys():

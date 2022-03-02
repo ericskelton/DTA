@@ -331,6 +331,8 @@ def getTriggers():
 
     return dbCallWrapper({}, {'buy_triggers': 1, 'sell_triggers': 1}, func = db.user.find, eventLog = False)
 
+
+# TODO rewrite this
 def dumplogXML(username = None):
     if(username):
         docs = dbCallWrapper({'username': username}, {}, func = db.log.find, eventLog = False)
@@ -340,15 +342,9 @@ def dumplogXML(username = None):
     transactionids = []
     for doc in docs:
         new_docs += '\t<'+doc['type']+'>\n'
-        if 'transactionId' in doc.keys():
-            if doc['transactionId'] in transactionids:
-                
-                index = transactionids.index(doc['transactionId'])
-
-                new_docs += '\t\t<transactionNum>'+str(index)+'</transactionNum>\n'
-        else:
-            transactionids.append(doc['_id'])
-            new_docs += '\t\t<transactionNum>'+str(len(transactionids) - 1)+'</transactionNum>\n'
+        
+        
+        # go through the keys and add them to the xml
         for key in doc:
             if key == 'ticker':
                 new_docs += '\t\t<stockSymbol>'+doc[key]+'</stockSymbol>\n'
@@ -358,6 +354,8 @@ def dumplogXML(username = None):
                 new_docs += '\t\t<command>'+doc[key].upper()+'</command>\n'
             elif key == 'userid':
                 new_docs += '\t\t<username>'+doc[key]+'</username>\n'
+            elif key == 'transactionNum':
+                new_docs += '\t\t<transactionNum>'+str(doc[key])+'</transactionNum>\n'
             elif key == 'timestamp':
                 if int(doc[key]) * 1000 > 10000000000000:
                     value = int(doc[key])
