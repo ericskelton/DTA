@@ -362,7 +362,7 @@ def dumplogXML(username = None):
                 else: 
                     value = int(doc[key]) * 1000
                 new_docs += '\t\t<timestamp>'+str(value)+'</timestamp>\n'
-            elif key != 'type' and key != '_id' and key != 'transactionId':
+            elif key != 'type' and key != '_id' and key != 'transactionId' and key != 'username':
                 new_docs += '\t\t<'+key+'>'+str(doc[key])+'</'+key+'>\n'
         new_docs += '\t</'+doc['type']+'>\n'
     new_docs += '</log>'
