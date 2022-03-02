@@ -335,17 +335,17 @@ def dumplogXML(username = None):
         docs = dbCallWrapper({'username': username}, {}, func = db.log.find, eventLog = False)
     else:
         docs = dbCallWrapper({}, {}, func = db.log.find, eventLog = False)
-    new_docs = '<?xml version="1.0" encoding="US-ASCII"?><log>'
+    new_docs = '<?xml version="1.0" encoding="US-ASCII"?>\\n\\t<log>'
     for doc in docs:
-        new_docs += '<'+doc['type']+'>'
+        new_docs += '\\t<'+doc['type']+'>\\n'
         if 'transactionId' in doc.keys():
-            new_docs += '<transactionId>'+str(doc['transactionId'])+'</transactionId>'
+            new_docs += '\\t\\t<transactionId>'+str(doc['transactionId'])+'</transactionId>\\n'
         else:
-            new_docs += '<transactionId>'+str(doc['_id'])+'</transactionId>\n'
+            new_docs += '\\t\\t<transactionId>'+str(doc['_id'])+'</transactionId>\\n'
         for key in doc:
             if key != 'type' and key != '_id' and key != 'transactionId':
-                new_docs += '<'+key+'>'+str(doc[key])+'</'+key+'>'
-        new_docs += '</'+doc['type']+'>'
+                new_docs += '\\t\\t<'+key+'>'+str(doc[key])+'</'+key+'>\\n'
+        new_docs += '\\t</'+doc['type']+'>\\n'
     new_docs += '</log>'
     return new_docs
             
