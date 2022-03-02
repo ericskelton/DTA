@@ -1,0 +1,19 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+django = "*"
+djangorestframework = "*"
+pygments = "*"
+PyJWT = "==1.7.1"
+requests = "*"
+django-environ = "*"
+gunicorn = "*"
+django-heroku = "*"
+
+[requires]
+python_version = "3.9"
