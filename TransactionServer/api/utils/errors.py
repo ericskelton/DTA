@@ -45,7 +45,7 @@ def logError(exception, request):
         'server': 'transactionserver',
         'errorMessage': errorMessage,
         'command': command,
-        'transactionId': request.transactionId
+        'transactionNum': request.transactionId
     }
     json.update(request.GET.dict())
     json.update(request.POST.dict())
