@@ -5,6 +5,7 @@ from api.utils.quoteServer import getQuote
 from hashlib import sha256
 from bson.objectid import ObjectId
 from api.utils.db import dbCallWrapper
+import xml.dom
 
 db, client = getDb()
 
@@ -335,7 +336,7 @@ def dumplogXML(username = None):
         docs = dbCallWrapper({'username': username}, {}, func = db.log.find, eventLog = False)
     else:
         docs = dbCallWrapper({}, {}, func = db.log.find, eventLog = False)
-    new_docs = '<?xml version="1.0" encoding="US-ASCII"?>\\n\\t<log>'
+    new_docs = '<?xml version="1.0"?>\\n\\t<log>'
     for doc in docs:
         new_docs += '\\t<'+doc['type']+'>\\n'
         if 'transactionId' in doc.keys():
@@ -348,7 +349,6 @@ def dumplogXML(username = None):
         new_docs += '\\t</'+doc['type']+'>\\n'
     new_docs += '</log>'
     return new_docs
-            
 
 def displayUserSummary(username):
     user = getUser(username)

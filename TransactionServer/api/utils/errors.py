@@ -36,7 +36,7 @@ def logError(exception, request):
     errorMessage = exception.args[0]
 
     # Get the command name
-    command = request.path.split('/')[-1]
+    command = request.path.split('/')[-2]
 
     # Get the parameters
     json = {
