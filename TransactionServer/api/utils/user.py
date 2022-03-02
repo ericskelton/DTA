@@ -235,7 +235,7 @@ def cancelSell(username, transactionId):
     if (getUser(username)['pending_sell']):
         dbCallWrapper({'username': username}, {'$set': {'pending_sell': None}}, func = db.user.update_one, eventLog = {'type': 'debugEvent', 'username': str(username), 'timestamp': int(time.time()), 'action': 'CANCEL_SELL', 'transactionId': transactionId})
         return True
-    raise Exception('No pending buy')
+    raise Exception('No pending sell')
 
 def cancelBuy(username, transactionId):
     # clear the pending transaction
@@ -359,7 +359,11 @@ def dumplogXML(username = None):
             elif key == 'userid':
                 new_docs += '\t\t<username>'+doc[key]+'</username>\n'
             elif key == 'timestamp':
-                new_docs += '\t\t<timestamp>'+str(int(doc[key]) * 1000)+'</timestamp>\n'
+                if int(doc[key]) * 1000 > 10000000000000:
+                    value = int(doc[key])
+                else: 
+                    value = int(doc[key]) * 1000
+                new_docs += '\t\t<timestamp>'+str(value)+'</timestamp>\n'
             elif key != 'type' and key != '_id' and key != 'transactionId':
                 new_docs += '\t\t<'+key+'>'+str(doc[key])+'</'+key+'>\n'
         new_docs += '\t</'+doc['type']+'>\n'
