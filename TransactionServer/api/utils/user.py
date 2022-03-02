@@ -337,12 +337,15 @@ def dumplogXML(username = None):
     else:
         docs = dbCallWrapper({}, {}, func = db.log.find, eventLog = False)
     new_docs = '<?xml version="1.0"?>\n\t<log>'
+    transactionids = []
     for doc in docs:
         new_docs += '\t<'+doc['type']+'>\n'
         if 'transactionId' in doc.keys():
-            new_docs += '\t\t<transactionNum>'+str(doc['transactionId'])+'</transactionNum>\n'
+            index = transactionids.index(doc['transactionId'])
+            new_docs += '\t\t<transactionNum>'+str(index)+'</transactionNum>\n'
         else:
-            new_docs += '\t\t<transactionNum>'+str(doc['_id'])+'</transactionNum>\n'
+            transactionids.append(doc['_id'])
+            new_docs += '\t\t<transactionNum>'+str(len(transactionids) - 1)+'</transactionNum>\n'
         for key in doc:
             if key == 'ticker':
                 new_docs += '\t\t<stockSymbol>'+doc[key]+'</stockSymbol>\n'
@@ -350,6 +353,10 @@ def dumplogXML(username = None):
                 new_docs += '\t\t<funds>'+str(doc[key])+'</funds>\n'
             elif key == 'command':
                 new_docs += '\t\t<command>'+doc[key].upper()+'</command>\n'
+            elif key == 'userid':
+                new_docs += '\t\t<username>'+doc[key]+'</username>\n'
+            elif key == 'timestamp':
+                new_docs += '\t\t<timestamp>'+str(doc[key] * 1000)+'</timestamp>\n'
             elif key != 'type' and key != '_id' and key != 'transactionId':
                 new_docs += '\t\t<'+key+'>'+str(doc[key])+'</'+key+'>\n'
         new_docs += '\t</'+doc['type']+'>\n'
