@@ -341,8 +341,11 @@ def dumplogXML(username = None):
     for doc in docs:
         new_docs += '\t<'+doc['type']+'>\n'
         if 'transactionId' in doc.keys():
-            index = transactionids.index(doc['transactionId'])
-            new_docs += '\t\t<transactionNum>'+str(index)+'</transactionNum>\n'
+            if doc['transactionId'] in transactionids:
+                
+                index = transactionids.index(doc['transactionId'])
+
+                new_docs += '\t\t<transactionNum>'+str(index)+'</transactionNum>\n'
         else:
             transactionids.append(doc['_id'])
             new_docs += '\t\t<transactionNum>'+str(len(transactionids) - 1)+'</transactionNum>\n'
