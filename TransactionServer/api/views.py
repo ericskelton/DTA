@@ -33,8 +33,9 @@ def quote(request, **kwargs):
 def add(request):
      
     
-    username = "test"
+    username = request.data.get('username')
     amount = request.data.get('amount', False) 
+
     try:
         return Response(addBalance(username, amount, request.transactionId))
     except Exception as e:
@@ -44,7 +45,7 @@ def add(request):
 @logRequest
 @api_view(['POST'])
 def buy(request):
-    username = "test"
+    username = request.data.get('username')
     ticker = request.data.get('ticker', False)
     amount = request.data.get('amount', False)
     try: 
@@ -62,7 +63,7 @@ def buy(request):
 @api_view(['POST','PATCH'])
 def commit_buy(request):
     
-    username = "test"
+    username = request.data.get('username')
     try:
         return Response(commitBuy(username, request.transactionId))
     except Exception as e:
@@ -73,7 +74,7 @@ def commit_buy(request):
 @logRequest
 @api_view(['POST'])
 def cancel_buy(request): 
-    username = "test"
+    username = request.data.get('username')
     try:
         return Response(cancelBuy(username, request.transactionId))
     except Exception as e:
@@ -83,7 +84,7 @@ def cancel_buy(request):
 @logRequest
 @api_view(['POST'])
 def sell(request):
-    username = "test"
+    username = request.data.get('username')
     amount = request.data.get('amount', False)
     ticker = request.data.get('ticker', False)
     try:
@@ -94,7 +95,7 @@ def sell(request):
 @logRequest
 @api_view(['POST'])
 def commit_sell(request):
-    username = "test"
+    username = request.data.get('username')
     try:
         return Response(commitSell(username, request.transactionId))
     except Exception as e:
@@ -103,7 +104,7 @@ def commit_sell(request):
 @logRequest
 @api_view(['POST'])
 def cancel_sell(request):
-    username = "test"
+    username = request.data.get('username')
     try:
         return Response(cancelSell(username, request.transactionId))
     except Exception as e:
@@ -113,7 +114,7 @@ def cancel_sell(request):
 @logRequest
 @api_view(['POST'])
 def set_buy_amount(request): 
-    username = "test"
+    username = request.data.get('username')
     amount = request.data.get('amount', False)
     ticker = request.data.get('ticker', False)
     try:
@@ -124,7 +125,7 @@ def set_buy_amount(request):
 @logRequest
 @api_view(['POST'])
 def cancel_set_buy(request):
-    username = "test"
+    username = request.data.get('username')
     ticker = request.data.get('ticker', False)
     try:
         return Response(cancelBuyTrigger(username,ticker,request.transactionId))
@@ -135,7 +136,7 @@ def cancel_set_buy(request):
 @logRequest
 @api_view(['POST'])
 def set_buy_trigger(request):
-    username = "test"
+    username = request.data.get('username')
     ticker = request.data.get('ticker', False)
     price = request.data.get('price', False)
     try:
@@ -146,7 +147,7 @@ def set_buy_trigger(request):
 @logRequest
 @api_view(['POST'])
 def set_sell_amount(request):
-    username = "test"
+    username = request.data.get('username')
     amount = request.data.get('amount', False)
     ticker = request.data.get('ticker', False)
     try:
@@ -157,7 +158,7 @@ def set_sell_amount(request):
 @logRequest
 @api_view(['POST'])
 def set_sell_trigger(request):
-    username = "test"
+    username =  request.data.get('username')
     price = request.data.get('price', False)
     ticker = request.data.get('ticker', False)
     try:
@@ -168,7 +169,7 @@ def set_sell_trigger(request):
 @logRequest
 @api_view(['POST'])
 def cancel_set_sell(request):
-    username = "test"
+    username = request.data.get('username')
     ticker = request.data.get('ticker', False)
     try:
         return Response(cancelSellTrigger(username, ticker,request.transactionId))
@@ -189,7 +190,7 @@ def dumplog(request):
 @api_view(['GET'])
 def displaySummary(request):  
     try:
-        username = 'test'
+        username = request.GET.get('username')
         return Response(displayUserSummary(username))
     except Exception as e:
         return handleViewError(e, request)
@@ -212,6 +213,7 @@ def createNewUser(request):
 @api_view(['GET'])
 def getUserObj(request):
     try:
+
         user = getUser("test")
         print(user)
         return Response(user)
