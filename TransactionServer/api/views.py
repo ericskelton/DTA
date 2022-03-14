@@ -202,16 +202,18 @@ def displaySummary(request):
 @csrf_exempt
 @api_view(['POST'])
 def createNewUser(request):
-    try:
+    
         body = request.data
-
-        if(createUser(body['name'], body['username'], body['password'])):
+        username = body.get('username')
+        password = body.get('password')
+        name = body.get('name')
+        if(createUser(name, username, password)):
             # TODO: log the user in when the account is created
             return Response("User created")
         
-    except Exception as e:
+    # except Exception as e:
         
-        return Response(e.message)
+    #    return Response(e)
 
 @api_view(['GET'])
 def getUserObj(request):
