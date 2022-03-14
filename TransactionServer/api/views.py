@@ -211,7 +211,7 @@ def createNewUser(request):
         
     except Exception as e:
         
-        return handleViewError(e, request)
+        return Response(e.message)
 
 @api_view(['GET'])
 def getUserObj(request):
