@@ -9,6 +9,7 @@ from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from api.utils.log import logRequest
+import json 
 
 @logRequest
 @api_view(['GET'])
@@ -34,8 +35,10 @@ def add(request):
      
     
     username = request.data.get('username')
+    print(username)
     amount = request.data.get('amount', False) 
-
+    print(amount)
+    print(request.data)
     try:
         return Response(addBalance(username, amount, request.transactionId))
     except Exception as e:
@@ -200,7 +203,7 @@ def displaySummary(request):
 @api_view(['POST'])
 def createNewUser(request):
     try:
-        body = request.data
+        body = json.loads(request.data)
 
         if(createUser(body['name'], body['username'], body['password'])):
             # TODO: log the user in when the account is created
