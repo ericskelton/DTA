@@ -203,7 +203,7 @@ def displaySummary(request):
 @api_view(['POST'])
 def createNewUser(request):
     try:
-        body = json.loads(request.data)
+        body = request.data
 
         if(createUser(body['name'], body['username'], body['password'])):
             # TODO: log the user in when the account is created
