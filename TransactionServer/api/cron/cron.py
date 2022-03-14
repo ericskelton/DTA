@@ -17,6 +17,8 @@ def trigger_job():
     for trigger in triggers:
         for stock in trigger['buy_triggers'].keys():
             quote = getQuote(stock, trigger['_id'], transactionId)
+            print(quote)
+            print(trigger)
             if trigger['buy_triggers'][stock]['price'] > quote['price']:
                 buyStock(trigger['_id'], trigger['buy_triggers'][stock]['amount'], quote, transactionId)
                 commitBuy(trigger['_id'], transactionId)
