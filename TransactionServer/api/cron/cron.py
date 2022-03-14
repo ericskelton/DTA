@@ -2,6 +2,7 @@ from api.utils.user import getTriggers, buyStock, sellStock, commitBuy, commitSe
 from api.utils.quoteServer import getQuote
 from api.utils.db import logJsonObject, dbCallWrapper, getDb
 import time
+import pymongo
 
 db, client = getDb()
 

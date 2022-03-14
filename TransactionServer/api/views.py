@@ -35,10 +35,8 @@ def add(request):
      
     
     username = request.data.get('username')
-    print(username)
     amount = request.data.get('amount', False) 
-    print(amount)
-    print(request.data)
+    
     try:
         return Response(addBalance(username, amount, request.transactionId))
     except Exception as e:
