@@ -11,7 +11,7 @@ def trigger_job():
     
     startTime = int(time.time() * 1000)  
     
-    objId = logJsonObject({'type': 'systemEvent', 'filename': 'trigger_job', 'server': 'transactionserver', 'timestamp': startTime})
+    
     
     transactionId = str(int(ObjectId(objId).binary.hex(), 16))
     triggers_executed = 0
@@ -19,6 +19,7 @@ def trigger_job():
         for stock in trigger['buy_triggers'].keys():
             quote = getQuote(stock, trigger['_id'], transactionId)
             if trigger['buy_triggers'][stock] and trigger['buy_triggers'][stock]['price'] > quote['price']:
+                objId = logJsonObject({'type': 'systemEvent', 'filename': 'trigger_job', 'server': 'transactionserver', 'timestamp': int(time.time() * 1000), 'stockSymbol': stock, 'username': trigger['buy_triggers'][stock]['userid']})
                 try:
                     user = getUser(trigger['buy_triggers'][stock]['userid'])
                     buyStock(user, trigger['buy_triggers'][stock]['amount'], quote, transactionId)
@@ -43,7 +44,7 @@ def trigger_job():
                 triggers_executed += 1
             
 
-    logJsonObject({'type': 'systemevent', 'filename': 'trigger_job_executed',  'triggers_executed': triggers_executed, 'time': str(time.time() - startTime) + ' milliseconds', 'transactionId': transactionId})
+    
 
     return
 

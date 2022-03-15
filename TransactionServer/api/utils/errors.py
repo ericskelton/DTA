@@ -44,12 +44,12 @@ def logError(exception, request, user):
         'timestamp': timestamp,
         'server': 'transactionserver',
         'errorMessage': errorMessage,
-        'command': command,
+        'command': command.upper(),
         'transactionNum': request.transactionId,
-        'funds': user['balance'],
-        'username': user['username']
+        'username': user['username'] if user else 'admin'
     }
-
+    if user:
+        json['funds'] = user['balance']
     
     dbCallWrapper(json, func = db.log.insert_one)
     

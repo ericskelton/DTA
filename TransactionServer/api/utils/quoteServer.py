@@ -60,7 +60,6 @@ def getQuote(ticker, user, transactionId):
                 'cryptokey': key,
                 'server': 'transactionserver',
                 'type': fetchType,
-                'transactionNum': transactionId
             })
         else:
             logJsonObject({
@@ -69,7 +68,6 @@ def getQuote(ticker, user, transactionId):
                 'timestamp': current_time,
                 'server': 'transactionserver',
                 'type': 'debugEvent',
-                'transactionNum': transactionId,
                 'debugMessage': 'Quote Server Cache Hit for ' + ticker
             })
         return {
