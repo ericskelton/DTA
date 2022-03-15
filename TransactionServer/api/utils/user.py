@@ -13,9 +13,8 @@ db, client = getDb()
 def getBalance(username):
     return dbCallWrapper({'username': username}, {'balance': 1}, func = db.user.find_one, eventLog = False)
 
-def addBalance(username, amount, transactionId):
-    print('amount', amount)
-    return dbCallWrapper({"username": username}, {'$inc': {'balance': float(amount)}}, func = db.user.update_one, eventLog = {'type': 'debugEvent', 'username': str(username), 'timestamp': int(time.time()), 'action': 'ADD_BALANCE', 'amount': amount, 'transactionId': transactionId})
+def addBalance(user, amount, transactionId):
+    return dbCallWrapper({"username": user['username']}, {'$inc': {'balance': float(amount)}}, func = db.user.update_one, eventLog = {'type': 'AccountTransaction', 'username': str(username), 'timestamp': int(time.time()*1000), 'action': 'ADD', 'amount': amount, 'transactionNum': transactionId, 'funds': user['balance'] + amount, 'server': 'transactionserver'})
 
 
 def subBalance(username, amount):
@@ -64,18 +63,18 @@ def login(username, password):
 
 # sets the pending transaction to the pending transaction field on the user
 # fails if the user does not have enough balance
-def buyStock(username, amount, quote, transactionId):
+def buyStock(user, amount, quote, transactionId):
     price = quote['price']
     stock = quote['ticker']
     timestamp = quote['timestamp']
     cryptographicKey = quote['cryptographicKey']
-    user = getUser(username)
+    
     amount = float(amount)
     # check if the user has enough balance to buy
     if(user['balance'] >= amount * price):
 
         # set pending transaction
-        dbCallWrapper({'username': username}, {
+        dbCallWrapper({'username': user['username']}, {
             '$set': {
                 'pending_buy' : {
                     'stock': stock, 
@@ -85,7 +84,7 @@ def buyStock(username, amount, quote, transactionId):
                     'cryptographicKey': cryptographicKey
                 }
             }
-        }, func = db.user.update_one, eventLog = {'type': 'debugEvent', 'username': str(username), 'timestamp': timestamp, 'action': 'BUY', 'stock': stock, 'amount': amount, 'price': price, 'cryptographicKey': cryptographicKey, 'transactionId': transactionId})
+        }, func = db.user.update_one, eventLog = {'type': 'AccountTransaction', 'username': str(user['username']), 'timestamp': timestamp, 'action': 'BUY', 'transactionNum': transactionId,'server':'transactionserver', 'funds': user['balance']})
         return {
             'stock': stock,
             'amount': amount,
@@ -97,18 +96,17 @@ def buyStock(username, amount, quote, transactionId):
 # removes the pending buy
 # adds the transaction to the transactions list
 # if the any quote is over 1 minute old, we fail 
-def commitBuy(username, transactionId):
-    user = getUser(username)
+def commitBuy(user, transactionId):
     transaction = user['pending_buy']
     if(transaction):
         if(int(time.time() * 1000) - float(transaction['timestamp']) > 60000):
             # clear the pending transaction
-            db.user.update_one({'username': username}, {'$set': {'pending_buy': None}})
+            db.user.update_one({'username': user['username']}, {'$set': {'pending_buy': None}})
             raise Exception('Quote expired')
         else:
             # buy the stock
             if(transaction['stock'] in user['stocks']):
-                dbCallWrapper( {'username': username}, {
+                dbCallWrapper( {'username': user['username']}, {
                     '$inc': {
                         'stocks.' + transaction['stock'] + '.amount': transaction['amount'],
                         'balance': -transaction['amount'] * transaction['price']
@@ -120,10 +118,10 @@ def commitBuy(username, transactionId):
                         'transactions': transaction
                     },
                     '$set': {'pending_buy': None}
-                }, func = db.user.update_one, eventLog = {'type': 'accountTransaction', 'username': str(username), 'timestamp': int(time.time()), 'action': 'BUY_SHARES', 'stock': transaction['stock'], 'amount': transaction['amount'], 'price': transaction['price'], 'cryptographicKey': transaction['cryptographicKey'], 'transactionId': transactionId})
+                }, func = db.user.update_one, eventLog = {'type': 'AccountTransaction', 'username': str(user['username']), 'timestamp': int(time.time()*1000), 'action': 'COMMIT_BUY', 'funds': user['balance'] - transaction['price'],  'transactionNum': transactionId, 'server': 'transactionserver'})
                 
             else:
-                dbCallWrapper( {'username': username}, {
+                dbCallWrapper( {'username': user['username']}, {
                     '$set': {
                         'stocks.' +transaction['stock']: {
                             'stock': transaction['stock'], 
@@ -142,7 +140,7 @@ def commitBuy(username, transactionId):
                     '$inc': {
                         'balance': -transaction['amount'] * transaction['price']
                     }
-                }, func = db.user.update_one, eventLog = {'type': 'accountTransaction', 'username': str(username), 'timestamp': int(time.time()), 'action': 'BUY_SHARES', 'stock': transaction['stock'], 'amount': transaction['amount'], 'price': transaction['price'], 'cryptographicKey': transaction['cryptographicKey'], 'transactionId': transactionId})
+                }, func = db.user.update_one, eventLog = {'type': 'AccountTransaction', 'username': str(user['username']), 'timestamp': int(time.time()*1000), 'action': 'COMMIT_BUY', 'funds': user['balance'] - transaction['price'],  'transactionNum': transactionId, 'server': 'transactionserver'})
             
             
             
@@ -150,8 +148,7 @@ def commitBuy(username, transactionId):
             return True
     raise Exception('No pending transaction')
 
-def sellStock(username, amount, quote, transactionId):
-    user = getUser(username)
+def sellStock(user, amount, quote, transactionId):
     price = quote['price']
     stock = quote['ticker']
     timestamp = quote['timestamp']
@@ -163,7 +160,7 @@ def sellStock(username, amount, quote, transactionId):
        
         # set the transaction to the user's pending transaction
         dbCallWrapper(
-            {'username': username}, {
+            {'username': user['username']}, {
                 '$set': {
                     'pending_sell': {
                         'stock': stock, 
@@ -175,18 +172,17 @@ def sellStock(username, amount, quote, transactionId):
                 }
             }, 
             func = db.user.update_one,
-            eventLog = {'type': 'debugEvent', 'username': str(username), 'timestamp': timestamp, 'action': 'SELL', 'stock': stock, 'amount': amount, 'price': price, 'cryptographicKey': cryptographicKey, 'transactionId': transactionId}
+            eventLog = {'type': 'AccountTransaction', 'username': str(user['username']), 'timestamp': int(time.time()*1000), 'action': 'SELL', 'funds': user['balance'],  'transactionNum': transactionId, 'server': 'transactionserver'}
         )
         return True
     raise Exception('Insufficient stock')
 
-def commitSell(username, transactionId):
-    user = getUser(username)
+def commitSell(user, transactionId):
     transaction = user['pending_sell']
     if(transaction):
         if(time.time() - float(transaction['timestamp']) > 60):
             # clear the pending transaction
-            dbCallWrapper({'username': username}, {'$set': {'pending_sell': None}}, func = db.user.update_one)
+            dbCallWrapper({'username': user['username']}, {'$set': {'pending_sell': None}}, func = db.user.update_one)
             raise Exception('Quote expired')
         else:
             # sell the stock
@@ -194,7 +190,7 @@ def commitSell(username, transactionId):
 
             if(totalAmount == transaction['amount']):
                 dbCallWrapper(
-                    {'username': username}, {
+                    {'username': user['username']}, {
                         '$inc': {
                             'stocks.' + transaction['stock'] + '.amount': -transaction['amount'],
                             'balance': transaction['amount'] * transaction['price']
@@ -208,11 +204,11 @@ def commitSell(username, transactionId):
                         }
                     }, 
                     func = db.user.update_one,
-                    eventLog = {'type': 'accountTransaction', 'username': str(username), 'timestamp': int(time.time()), 'action': 'SELL_SHARES', 'stock': transaction['stock'], 'amount': transaction['amount'], 'price': transaction['price'], 'cryptographicKey': transaction['cryptographicKey'], 'transactionId': transactionId}
+                    eventLog = {'type': 'accountTransaction', 'username': str(user['username']), 'timestamp': int(time.time()*1000), 'action': 'COMMIT_SELL', 'server':'transactionserver', 'transactionNum': transactionId, 'funds': user['balance'] + (transaction['amount'] * transaction['price'])}
                 )
             else:
 
-                dbCallWrapper({'username': username}, {
+                dbCallWrapper({'username': user['username']}, {
                     '$inc': {
                         'stocks.' + transaction['stock'] + '.amount': -transaction['amount'],
                         'balance': transaction['amount'] * transaction['price']
@@ -226,29 +222,29 @@ def commitSell(username, transactionId):
                     '$set': {
                         'pending_sell': None
                     }
-                }, func = db.user.update_one, eventLog = {'type': 'accountTransaction', 'username': str(username), 'timestamp': int(time.time()), 'action': 'SELL_SHARES', 'stock': transaction['stock'], 'amount': transaction['amount'], 'price': transaction['price'], 'cryptographicKey': transaction['cryptographicKey'], 'transactionId': transactionId})
+                }, func = db.user.update_one, eventLog = {'type': 'accountTransaction', 'username': str(user['username']), 'timestamp': int(time.time()*1000), 'action': 'COMMIT_SELL', 'server':'transactionserver', 'transactionNum': transactionId, 'funds': user['balance'] + (transaction['amount'] * transaction['price'])})
 
             return True
     raise Exception('No pending transaction')
 
-def cancelSell(username, transactionId):
+def cancelSell(user, transactionId):
     # clear the pending transaction
-    if (getUser(username)['pending_sell']):
-        dbCallWrapper({'username': username}, {'$set': {'pending_sell': None}}, func = db.user.update_one, eventLog = {'type': 'debugEvent', 'username': str(username), 'timestamp': int(time.time()), 'action': 'CANCEL_SELL', 'transactionId': transactionId})
+    if (user['pending_sell']):
+        dbCallWrapper({'username': user['username']}, {'$set': {'pending_sell': None}}, func = db.user.update_one, eventLog = {'type': 'accountTransaction', 'username': str(user['username']), 'timestamp': int(time.time()*1000), 'action': 'CANCEL_SELL', 'server':'transactionserver', 'transactionNum': transactionId, 'funds': user['balance']})
         return True
     raise Exception('No pending sell')
 
-def cancelBuy(username, transactionId):
+def cancelBuy(user, transactionId):
     # clear the pending transaction
-    if (getUser(username)['pending_buy']):
-        dbCallWrapper({'username': username}, {'$set': {'pending_buy': None}}, func = db.user.update_one, eventLog = {'type': 'debugEvent', 'username': str(username), 'timestamp': int(time.time()), 'action': 'CANCEL_BUY', 'transactionId': transactionId})
+    if (user['pending_buy']):
+        dbCallWrapper({'username': user['username']}, {'$set': {'pending_buy': None}}, func = db.user.update_one, eventLog = {'type': 'accountTransaction', 'username': str(user['username']), 'timestamp': int(time.time()*1000), 'action': 'CANCEL_BUY', 'server':'transactionserver', 'transactionNum': transactionId, 'funds': user['balance']})
         return True
     raise Exception('No pending buy')
 
 
-def setBuyAmount(username, stock, amount, transactionId):
+def setBuyAmount(user, stock, amount, transactionId):
     
-    return dbCallWrapper({'username': username}, {
+    return dbCallWrapper({'username': user['username']}, {
         '$set': {
             'pending_trigger': {
                 'stock': stock,
@@ -257,12 +253,11 @@ def setBuyAmount(username, stock, amount, transactionId):
             }
         }
     }, func = db.user.update_one, 
-    eventLog = {'type': 'debugEvent', 'username': str(username), 'timestamp': int(time.time()), 'action': 'SET_BUY_AMOUNT', 'stock': stock, 'amount': amount, 'transactionId': transactionId})
+    eventLog = {'type': 'accountTransaction', 'username': str(user['username']), 'timestamp': int(time.time()*1000), 'action': 'SET_BUY_AMOUNT', 'server':'transactionserver', 'transactionNum': transactionId, 'funds': user['balance']})
     
 
-def setSellAmount(username, stock, amount, transactionId):
-
-    return dbCallWrapper({'username': username}, {
+def setSellAmount(user, stock, amount, transactionId):
+    return dbCallWrapper({'username': user['username']}, {
         '$set': {
             'pending_trigger': {
                 'stock': stock,
@@ -270,67 +265,63 @@ def setSellAmount(username, stock, amount, transactionId):
                 'type': 'sell'
                 }
         }
-    }, func = db.user.update_one, eventLog={'type': 'debugEvent', 'username': str(username), 'timestamp': int(time.time()), 'action': 'SET_BUY_AMOUNT', 'stock': stock, 'amount': amount, 'transactionId': transactionId})
+    }, func = db.user.update_one, eventLog={'type': 'accountTransaction', 'username': str(user['username']), 'timestamp': int(time.time()*1000), 'action': 'SET_SELL_AMOUNT', 'server':'transactionserver', 'transactionNum': transactionId, 'funds': user['balance']})
 
-def setBuyTrigger(username, stock, price, transactionId):
-    user = getUser(username)
+def setBuyTrigger(user, stock, price, transactionId):
     if(user['pending_trigger']['stock'] == stock and user['pending_trigger']['type'] == 'buy'):
-        
-        return dbCallWrapper({'username': username}, {
+        if user['balance'] < price * user['pending_trigger']['amount']:
+            raise Exception('Insufficient funds to buy at that price')
+        return dbCallWrapper({'username': user['username']}, {
             '$set': {
                 'pending_trigger': None,
                 'buy_triggers'+'.'+stock: {
                     'amount': user['pending_trigger']['amount'],
                     'price': price,
-                    'userid': username,
+                    'userid': user['username'],
                     'type': 'buy'
-                    
                 }
             }
         }, func = db.user.update_one,
-        eventLog = {'type': 'debugEvent', 'username': str(username), 'timestamp': int(time.time()), 'action': 'SET_BUY_TRIGGER', 'stock': stock, 'price': price, 'transactionId': transactionId})
+        eventLog = {'type': 'accountTransaction', 'username': str(user['username']), 'timestamp': int(time.time()*1000), 'action': 'SET_BUY_TRIGGER', 'server':'transactionserver', 'transactionNum': transactionId, 'funds': user['balance']})
         
     raise Exception('No pending trigger')
 
-def setSellTrigger(username, stock, price, transactionId):
-    user = getUser(username)
+def setSellTrigger(user, stock, price, transactionId):
 
     if(user['pending_trigger']['stock'] == stock and user['pending_trigger']['type'] == 'sell'):
         stock = user['stock'].get(stock, None)
         if(stock):
-            return dbCallWrapper({'username': username}, {
+            return dbCallWrapper({'username': user['username']}, {
                 '$set': {
                     'pending_trigger': None,
                     'sell_triggers': {
                         stock: {
                             'amount': user['pending_trigger']['amount'],
                             'price': price,
-                            'userid': username,
+                            'userid': user['username'],
                             'type': 'sell'
                         }
                     }
                 }
-            }, func = db.user.update_one, eventLog = {'type': 'debugEvent', 'username': str(username), 'timestamp': int(time.time()), 'action': 'SET_BUY_TRIGGER', 'stock': stock, 'price': price, 'transactionId': transactionId})
+            }, func = db.user.update_one, eventLog = {'type': 'accountTransaction', 'username': str(user['username']), 'timestamp': int(time.time()*1000), 'action': 'SET_SELL_TRIGGER', 'server':'transactionserver', 'transactionNum': transactionId, 'funds': user['balance']})
         raise Exception('Stock not owned')
     raise Exception('No pending trigger')
-def cancelSellTrigger(username, stock, transactionId):
-    user = getUser(username)
+def cancelSellTrigger(user, stock, transactionId):
     if(user['sell_triggers'][stock] and user['sell_triggers'][stock]['type'] == 'sell'):
-        return dbCallWrapper({'username': username}, {
+        return dbCallWrapper({'username': user['username']}, {
             '$set': {
                 'sell_triggers.' + stock: None
             }
-        }, func = db.user.update_one, eventLog={'type': 'debugEvent', 'username': str(username), 'timestamp': int(time.time()), 'action': 'CANCEL_SELL_TRIGGER', 'stock': stock, 'transactionId': transactionId})
+        }, func = db.user.update_one, eventLog={'type': 'accountTransaction', 'username': str(user['username']), 'timestamp': int(time.time()*1000), 'action': 'CANCEL_SELL_TRIGGER', 'server':'transactionserver', 'transactionNum': transactionId, 'funds': user['balance']})
     raise Exception('No active sell trigger on specified stock')
 
-def cancelBuyTrigger(username, stock, transactionId):
-    user = getUser(username)
+def cancelBuyTrigger(user, stock, transactionId):
     if(user['buy_triggers'][stock] and user['buy_triggers'][stock]['type'] == 'buy'):
-        return dbCallWrapper({'username': username}, {
+        return dbCallWrapper({'username': user['username']}, {
             '$set': {
                 'buy_triggers.' + stock: None
             }
-        }, func = db.user.update_one, eventLog = {'type': 'debugEvent', 'username': str(username), 'timestamp': int(time.time()), 'action': 'CANCEL_SELL_TRIGGER', 'stock': stock, 'transactionId': transactionId})
+        }, func = db.user.update_one, eventLog ={'type': 'accountTransaction', 'username': str(user['username']), 'timestamp': int(time.time()*1000), 'action': 'CANCEL_BUY_TRIGGER', 'server':'transactionserver', 'transactionNum': transactionId, 'funds': user['balance']})
 
 def getTriggers():
 
@@ -346,44 +337,18 @@ def dumplogXML(username = None):
     new_docs = '<?xml version="1.0"?>\n\t<log>'
     transactionids = []
     for doc in docs:
-        if doc['type'] == 'quote_cache':
-            continue
         new_docs += '\t<'+doc['type']+'>\n'
-        if doc['type'] == 'debugEvent'  and (doc.get('transactionId', None)) :
-            new_docs += '\t\t<transactionNum>'+str(doc['transactionId'])+'</transactionNum>\n'
-        elif doc['type'] == 'quoteServer':
-            new_docs += '\t\t<transactionNum>'+str(doc['transactionId'])+'</transactionNum>\n'
-            new_docs += '\t\t<quoteServerTime>'+str(random.randint(0,5)) + ' ms'+'</quoteServerTime>\n'
-            new_docs += '\t</'+doc['type']+'>\n'
-            continue
-        elif doc['type'] == 'debugEvent':
-            new_docs += '\t\t<server>transactionserver</server>\n'
-            
         
+            
+        if not doc.get('transactionNum', False):
+            new_docs += '\t\t<transactionNum>'+str(int(ObjectId(doc['_id']).binary.hex(), 16))+'</transactionNum>\n'
         # go through the keys and add them to the xml
         for key in doc:
-            if key == 'ticker' or key == 'stock':
-                new_docs += '\t\t<stockSymbol>'+doc[key]+'</stockSymbol>\n'
-            elif key == 'amount':
-                new_docs += '\t\t<funds>'+str(doc[key])+'</funds>\n'
-            elif key == 'cryptographicKey':
-                new_docs += '\t\t<cryptokey>'+doc[key]+'</cryptokey>\n'
-            elif key == 'command' or key == 'action':
-                new_docs += '\t\t<command>'+(doc[key].upper() if doc[key].upper() != 'ADD_BALANCE' else 'ADD') +'</command>\n'
-            elif key == 'transactionNum':
-                new_docs += '\t\t<transactionNum>'+str(doc[key])+'</transactionNum>\n'
-            elif key == 'timestamp':
-                if int(doc[key]) * 1000 > 10000000000000:
-                    value = int(doc[key])
-                else: 
-                    value = int(doc[key]) * 1000
-                new_docs += '\t\t<timestamp>'+str(value)+'</timestamp>\n'
-            elif key != 'type' and key != '_id' and key != 'transactionId' and key != 'userid' and (doc['type'] != 'debugEvent' or key != 'price'):
+            if key != 'type' and key != '_id':
                 new_docs += '\t\t<'+key+'>'+str(doc[key])+'</'+key+'>\n'
         new_docs += '\t</'+doc['type']+'>\n'
     new_docs += '</log>'
     return new_docs
 
-def displayUserSummary(username):
-    user = getUser(username)
+def displayUserSummary(user):
     return {'username': user['username'], 'balance': user['balance'], 'stocks': user['stocks'], 'triggers': user['buy_triggers'].update(user['sell_triggers']), 'transactions': user['transactions']}

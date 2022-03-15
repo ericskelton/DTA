@@ -4,7 +4,7 @@ from datetime import datetime
 from os import path
 import time
 import environ
-import pymongo
+from bson.objectid import ObjectId
 
 # initialize the environment
 env = environ.Env()
@@ -24,14 +24,7 @@ def logRequest(view):
     def wrapper(request, **kwargs):
         if(not env('LOG')):
             return view(request)
-        timestamp = str(int(time.time()))	
-        # get the last transactionNum from the database
-        transactionNum = db.log.find_one({'type': 'userCommand'}, {'transactionNum': 1}, sort=[('_id', pymongo.DESCENDING)])
-        
-        transactionNum = transactionNum['transactionNum'] + 1 if transactionNum and 'transactionNum' in transactionNum.keys() else 1
-        # Get the username
-        # user = request.user.username
-        user = "test" if env('HARD_CODED_USER') else request.user.id	
+        timestamp = str(int(time.time()*1000))	
         # Get the command name
         command = request.path.split('/')[-2]	
         # Get the parameters	
@@ -39,17 +32,21 @@ def logRequest(view):
         json = {
         	'type': 'userCommand',
         	'timestamp': timestamp,
-        	'userid': user,
-        	'command': command,
+        	'command': command.upper(),
         	'server': 'transactionserver',
-            'transactionNum': transactionNum   
-        }	
-        json.update(request.GET.dict())
-        json.update(request.POST.dict())
-        dbCallWrapper(json, func = db.log.insert_one)
-        request.transactionId = transactionNum
-        
-        
+        }
+        if request.method == 'POST' :
+
+            allParams = dict(request.data)
+            allParams.update(request.POST.dict())
+        else:
+            allParams = request.GET.dict()
+        json['username'] = allParams['username'] if 'username' in allParams.keys() else 'admin' 
+        if 'ticker' in allParams.keys():
+            json['stockSymbol'] = allParams['ticker']
+        objId = dbCallWrapper(json, func = db.log.insert_one)
+        request.transactionId = str(int(ObjectId(objId).binary.hex(), 16)) # cast to int
+        print(request.transactionId, type(request.transactionId))
         return view(request, **kwargs)
         
     return wrapper

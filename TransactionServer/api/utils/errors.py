@@ -10,7 +10,7 @@ env.read_env()
 db, client = getDb()
 
 # moved from log to avoid circular import
-def logError(exception, request):
+def logError(exception, request, user):
     """
     Logs an error.
     to the file BASE_DIR/logs/transactionserver.xml
@@ -45,20 +45,20 @@ def logError(exception, request):
         'server': 'transactionserver',
         'errorMessage': errorMessage,
         'command': command,
-        'transactionNum': request.transactionId
+        'transactionNum': request.transactionId,
+        'funds': user['balance'],
+        'username': user['username']
     }
-    json.update(request.GET.dict())
-    json.update(request.POST.dict())
 
     
     dbCallWrapper(json, func = db.log.insert_one)
     
     return 
-def handleViewError(exception, request):
+def handleViewError(exception, request, user):
     """
     Handles a view error.
     """
-    logError(exception, request)
+    logError(exception, request, user)
     statuses = {
         'UserNotFound': status.HTTP_404_NOT_FOUND,
         'UserAlreadyExists': status.HTTP_409_CONFLICT,

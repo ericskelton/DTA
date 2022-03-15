@@ -3,7 +3,7 @@ from api.utils.db import *
 import time
 import random
 db, client = getDb()
-def getQuote(ticker, userid, transactionId):
+def getQuote(ticker, user, transactionId):
     #try:
     #    HOST = '192.168.4.2'
     #    PORT = 4444
@@ -41,29 +41,41 @@ def getQuote(ticker, userid, transactionId):
         from key_generator.key_generator import generate
         current_time = int(time.time() * 1000)
         key = generate(seed = randomFloat//1).get_key()
-        print(key)
-        quote = dbCallWrapper({"type": "quoteServer", "ticker": ticker, 'timestamp': {"$gt": current_time - 60000}}, func = db.log.find_one)
+        quote = dbCallWrapper({"type": "quoteServer", "stockSymbol": ticker, 'timestamp': {"$gt": current_time - 60000}}, func = db.log.find_one)
         if quote:
-            key = quote['cryptographicKey']
+            key = quote['cryptokey']
             quote = quote['price']
         
         randomFloat = quote if quote else randomFloat
         fetchType = 'quoteServer' if not quote else 'quote_cache'
-        
-        logJsonObject({
-            'ticker': ticker,
-            'price': randomFloat,
-            'username': userid,
-            'timestamp': current_time,
-            'cryptographicKey': key,
-            'type': fetchType,
-            'transactionId': transactionId
-        })
+        if fetchType == 'quoteServer':
+
+            logJsonObject({
+                # QUOTE SERVER LOG 
+                'stockSymbol': ticker,
+                'price': randomFloat,
+                'username': user['username'],
+                'quoteServerTime': random.randint(1,5),
+                'timestamp': current_time,
+                'cryptokey': key,
+                'server': 'transactionserver',
+                'type': fetchType,
+                'transactionNum': transactionId
+            })
+        else:
+            logJsonObject({
+                # SYSTEM EVENT LOG FOR CACHE
+                'username': user['username'],
+                'timestamp': current_time,
+                'server': 'transactionserver',
+                'type': 'debugEvent',
+                'transactionNum': transactionId,
+                'debugMessage': 'Quote Server Cache Hit for ' + ticker
+            })
         return {
             'ticker': ticker,
-            # random value from 50 to 300, rounded to 2 decimal places its real ugly i know
             'price': randomFloat,
-            'username': userid,
+            'username': user['username'],
             'timestamp': current_time,
             'cryptographicKey': key,
         }

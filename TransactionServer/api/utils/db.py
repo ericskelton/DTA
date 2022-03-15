@@ -76,7 +76,7 @@ def dbCallWrapper(*args, **kwargs):
     else:
         except_on_not_found = False
     queryResults = dbfunc(*args)
-    print(queryResults)
+    # print(queryResults)
     if isinstance(eventLog, dict):
         logJsonObject(eventLog)
     if queryResults:
@@ -87,3 +87,4 @@ def dbCallWrapper(*args, **kwargs):
         raise Exception('Error: No results returned from database')
     else:
         return False
+
