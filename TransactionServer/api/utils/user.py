@@ -350,12 +350,14 @@ def dumplogXML(username = None):
         
         # go through the keys and add them to the xml
         for key in doc:
-            if key == 'ticker':
+            if key == 'ticker' or key == 'stock':
                 new_docs += '\t\t<stockSymbol>'+doc[key]+'</stockSymbol>\n'
             elif key == 'amount':
                 new_docs += '\t\t<funds>'+str(doc[key])+'</funds>\n'
-            elif key == 'command':
-                new_docs += '\t\t<command>'+doc[key].upper()+'</command>\n'
+            elif key == 'crytographicKey':
+                new_docs += '\t\t<cryptokey>'+doc[key]+'</cryptokey>\n'
+            elif key == 'command' or key == 'action':
+                new_docs += '\t\t<command>'+doc[key].upper() if doc[key].upper() != 'ADD_BALANCE' else 'ADD' +'</command>\n'
             elif key == 'transactionNum':
                 new_docs += '\t\t<transactionNum>'+str(doc[key])+'</transactionNum>\n'
             elif key == 'timestamp':
