@@ -346,7 +346,8 @@ def dumplogXML(username = None):
     transactionids = []
     for doc in docs:
         new_docs += '\t<'+doc['type']+'>\n'
-        
+        if doc['type'] == 'debugEvent' and (doc.get('action', None)[:3] == 'ADD' or doc.get('COMMAND')[:3] == 'ADD') and (doc.get('transactionId', None)) :
+            new_docs += '\t\t<transactionNum>'+doc['transactionId']+'</transactionNum>\n'
         
         # go through the keys and add them to the xml
         for key in doc:
@@ -354,7 +355,7 @@ def dumplogXML(username = None):
                 new_docs += '\t\t<stockSymbol>'+doc[key]+'</stockSymbol>\n'
             elif key == 'amount':
                 new_docs += '\t\t<funds>'+str(doc[key])+'</funds>\n'
-            elif key == 'crytographicKey':
+            elif key == 'cryptographicKey':
                 new_docs += '\t\t<cryptokey>'+doc[key]+'</cryptokey>\n'
             elif key == 'command' or key == 'action':
                 new_docs += '\t\t<command>'+doc[key].upper() if doc[key].upper() != 'ADD_BALANCE' else 'ADD' +'</command>\n'
