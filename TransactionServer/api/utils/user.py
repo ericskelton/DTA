@@ -358,7 +358,7 @@ def dumplogXML(username = None):
             elif key == 'cryptographicKey':
                 new_docs += '\t\t<cryptokey>'+doc[key]+'</cryptokey>\n'
             elif key == 'command' or key == 'action':
-                new_docs += '\t\t<command>'+doc[key].upper() if doc[key].upper() != 'ADD_BALANCE' else 'ADD' +'</command>\n'
+                new_docs += '\t\t<command>'+(doc[key].upper() if doc[key].upper() != 'ADD_BALANCE' else 'ADD') +'</command>\n'
             elif key == 'transactionNum':
                 new_docs += '\t\t<transactionNum>'+str(doc[key])+'</transactionNum>\n'
             elif key == 'timestamp':
