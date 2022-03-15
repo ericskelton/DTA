@@ -347,7 +347,7 @@ def dumplogXML(username = None):
     for doc in docs:
         new_docs += '\t<'+doc['type']+'>\n'
         if doc['type'] == 'debugEvent' and (doc.get('action', None)[:3] == 'ADD' or doc.get('COMMAND')[:3] == 'ADD') and (doc.get('transactionId', None)) :
-            new_docs += '\t\t<transactionNum>'+doc['transactionId']+'</transactionNum>\n'
+            new_docs += '\t\t<transactionNum>'+str(doc['transactionId'])+'</transactionNum>\n'
         
         # go through the keys and add them to the xml
         for key in doc:
