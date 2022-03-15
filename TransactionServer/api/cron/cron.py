@@ -41,7 +41,7 @@ def trigger_job():
             user = getUser(trigger['sell_triggers'][stock]['userid'])
             quote = getQuote(stock, user, 'not used anymore')
             if trigger['sell_triggers'][stock] and trigger['sell_triggers'][stock]['price'] < quote['price']:
-                objId = logJsonObject({'type': 'systemEvent', 'filename': 'trigger_job', 'server': 'transactionserver', 'timestamp': int(time.time() * 1000), 'stockSymbol': stock, 'username': trigger['buy_triggers'][stock]['userid']})
+                objId = logJsonObject({'type': 'systemEvent', 'filename': 'trigger_job', 'server': 'transactionserver', 'timestamp': int(time.time() * 1000), 'stockSymbol': stock, 'username': trigger['sell_triggers'][stock]['userid']})
                 
                 transactionId = str(int(ObjectId(objId).binary.hex(), 16))
                 
