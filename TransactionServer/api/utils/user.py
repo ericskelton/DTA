@@ -356,8 +356,6 @@ def dumplogXML(username = None):
                 new_docs += '\t\t<funds>'+str(doc[key])+'</funds>\n'
             elif key == 'command':
                 new_docs += '\t\t<command>'+doc[key].upper()+'</command>\n'
-            elif key == 'userid':
-                new_docs += '\t\t<username>'+doc[key]+'</username>\n'
             elif key == 'transactionNum':
                 new_docs += '\t\t<transactionNum>'+str(doc[key])+'</transactionNum>\n'
             elif key == 'timestamp':
@@ -366,7 +364,7 @@ def dumplogXML(username = None):
                 else: 
                     value = int(doc[key]) * 1000
                 new_docs += '\t\t<timestamp>'+str(value)+'</timestamp>\n'
-            elif key != 'type' and key != '_id' and key != 'transactionId' and key != 'username':
+            elif key != 'type' and key != '_id' and key != 'transactionId' and key != 'userid':
                 new_docs += '\t\t<'+key+'>'+str(doc[key])+'</'+key+'>\n'
         new_docs += '\t</'+doc['type']+'>\n'
     new_docs += '</log>'
