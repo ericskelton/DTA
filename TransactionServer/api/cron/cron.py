@@ -16,7 +16,8 @@ def trigger_job():
     triggers_executed = 0
     for trigger in triggers:
         for stock in trigger['buy_triggers'].keys():
-            quote = getQuote(stock, trigger['_id'], 'not used anymore')
+            user = getUser(trigger['buy_triggers'][stock]['userid'])
+            quote = getQuote(stock, user, 'not used anymore')
             if trigger['buy_triggers'][stock] and trigger['buy_triggers'][stock]['price'] > quote['price']:
                 objId = logJsonObject({'type': 'systemEvent', 'filename': 'trigger_job', 'server': 'transactionserver', 'timestamp': int(time.time() * 1000), 'stockSymbol': stock, 'username': trigger['buy_triggers'][stock]['userid']})
                 
@@ -33,14 +34,15 @@ def trigger_job():
 
                 triggers_executed += 1
         for stock in trigger['sell_triggers'].keys():
-            quote = getQuote(stock, trigger['_id'], 'not used anymore')
+            user = getUser(trigger['sell_triggers'][stock]['userid'])
+            quote = getQuote(stock, user, 'not used anymore')
             if trigger['sell_triggers'][stock] and trigger['sell_triggers'][stock]['price'] < quote['price']:
                 objId = logJsonObject({'type': 'systemEvent', 'filename': 'trigger_job', 'server': 'transactionserver', 'timestamp': int(time.time() * 1000), 'stockSymbol': stock, 'username': trigger['buy_triggers'][stock]['userid']})
                 
                 transactionId = str(int(ObjectId(objId).binary.hex(), 16))
                 
                 try:
-                    user = getUser(trigger['sell_triggers'][stock]['userid'])
+                    
                     sellStock(user, trigger['sell_triggers'][stock]['amount'], quote, transactionId)
                     commitSell(user, transactionId)
                 except:
