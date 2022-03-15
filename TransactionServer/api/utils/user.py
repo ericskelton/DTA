@@ -274,6 +274,7 @@ def setSellAmount(username, stock, amount, transactionId):
 def setBuyTrigger(username, stock, price, transactionId):
     user = getUser(username)
     if(user['pending_trigger']['stock'] == stock and user['pending_trigger']['type'] == 'buy'):
+        
         return dbCallWrapper({'username': username}, {
             '$set': {
                 'pending_trigger': None,
@@ -294,19 +295,22 @@ def setSellTrigger(username, stock, price, transactionId):
     user = getUser(username)
 
     if(user['pending_trigger']['stock'] == stock and user['pending_trigger']['type'] == 'sell'):
-        return dbCallWrapper({'username': username}, {
-            '$set': {
-                'pending_trigger': None,
-                'sell_triggers': {
-                    stock: {
-                        'amount': user['pending_trigger']['amount'],
-                        'price': price,
-                        'userid': username,
-                        'type': 'sell'
+        stock = user['stock'].get(stock, None)
+        if(stock):
+            return dbCallWrapper({'username': username}, {
+                '$set': {
+                    'pending_trigger': None,
+                    'sell_triggers': {
+                        stock: {
+                            'amount': user['pending_trigger']['amount'],
+                            'price': price,
+                            'userid': username,
+                            'type': 'sell'
+                        }
                     }
                 }
-            }
-        }, func = db.user.update_one, eventLog = {'type': 'debugEvent', 'username': str(username), 'timestamp': int(time.time()), 'action': 'SET_BUY_TRIGGER', 'stock': stock, 'price': price, 'transactionId': transactionId})
+            }, func = db.user.update_one, eventLog = {'type': 'debugEvent', 'username': str(username), 'timestamp': int(time.time()), 'action': 'SET_BUY_TRIGGER', 'stock': stock, 'price': price, 'transactionId': transactionId})
+        raise Exception('Stock not owned')
     raise Exception('No pending trigger')
 def cancelSellTrigger(username, stock, transactionId):
     user = getUser(username)
