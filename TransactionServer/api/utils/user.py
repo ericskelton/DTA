@@ -353,7 +353,7 @@ def dumplogXML(username = None):
             new_docs += '\t\t<transactionNum>'+str(doc['transactionId'])+'</transactionNum>\n'
         elif doc['type'] == 'quoteServer':
             new_docs += '\t\t<transactionNum>'+str(doc['transactionId'])+'</transactionNum>\n'
-            new_docs += '\t\t<quoteServerTime>'+str(random.randint(0,5)) + ' ms'+'</timestamp>\n'
+            new_docs += '\t\t<quoteServerTime>'+str(random.randint(0,5)) + ' ms'+'</quoteServerTime>\n'
             new_docs += '\t</'+doc['type']+'>\n'
             continue
         elif doc['type'] == 'debugEvent':
