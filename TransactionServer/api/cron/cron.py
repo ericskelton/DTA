@@ -16,6 +16,8 @@ def trigger_job():
     triggers_executed = 0
     for trigger in triggers:
         for stock in trigger['buy_triggers'].keys():
+            if not trigger['buy_triggers'][stock]:
+                continue
             user = getUser(trigger['buy_triggers'][stock]['userid'])
             quote = getQuote(stock, user, 'not used anymore')
             if trigger['buy_triggers'][stock] and trigger['buy_triggers'][stock]['price'] > quote['price']:
@@ -34,6 +36,8 @@ def trigger_job():
 
                 triggers_executed += 1
         for stock in trigger['sell_triggers'].keys():
+            if not trigger['sell_triggers'][stock]:
+                continue
             user = getUser(trigger['sell_triggers'][stock]['userid'])
             quote = getQuote(stock, user, 'not used anymore')
             if trigger['sell_triggers'][stock] and trigger['sell_triggers'][stock]['price'] < quote['price']:
