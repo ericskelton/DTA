@@ -18,8 +18,8 @@ def trigger_job():
         for stock in trigger['buy_triggers'].keys():
             quote = getQuote(stock, trigger['_id'], transactionId)
             if trigger['buy_triggers'][stock] and trigger['buy_triggers'][stock]['price'] > quote['price']:
-                buyStock(trigger['_id'], trigger['buy_triggers'][stock]['amount'], quote, transactionId)
-                commitBuy(trigger['_id'], transactionId)
+                buyStock(trigger['buy_triggers'][stock]['userid'], trigger['buy_triggers'][stock]['amount'], quote, transactionId)
+                commitBuy(trigger['buy_triggers'][stock]['userid'], transactionId)
 
                 # remove trigger
 
@@ -29,8 +29,8 @@ def trigger_job():
         for stock in trigger['sell_triggers'].keys():
             quote = getQuote(stock, trigger['_id'], transactionId)
             if trigger['sell_triggers'][stock] and trigger['sell_triggers'][stock]['price'] < quote['price']:
-                sellStock(trigger['_id'], trigger['sell_triggers'][stock]['amount'], quote, transactionId)
-                commitSell(trigger['_id'], transactionId)
+                sellStock(trigger['sell_triggers'][stock]['userid'], trigger['sell_triggers'][stock]['amount'], quote, transactionId)
+                commitSell(trigger['sell_triggers'][stock]['userid'], transactionId)
                 dbCallWrapper({}, {'$set': {'sell_triggers.' + stock: None}}, func=db.user.update_one)
                 triggers_executed += 1
             
