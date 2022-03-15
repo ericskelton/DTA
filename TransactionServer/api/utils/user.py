@@ -6,6 +6,7 @@ from hashlib import sha256
 from bson.objectid import ObjectId
 from api.utils.db import dbCallWrapper
 import xml.dom
+import random
 
 db, client = getDb()
 
@@ -345,9 +346,19 @@ def dumplogXML(username = None):
     new_docs = '<?xml version="1.0"?>\n\t<log>'
     transactionids = []
     for doc in docs:
+        if doc['type'] == 'quote_cache':
+            continue
         new_docs += '\t<'+doc['type']+'>\n'
         if doc['type'] == 'debugEvent'  and (doc.get('transactionId', None)) :
             new_docs += '\t\t<transactionNum>'+str(doc['transactionId'])+'</transactionNum>\n'
+        elif doc['type'] == 'quoteServer':
+            new_docs += '\t\t<transactionNum>'+str(doc['transactionId'])+'</transactionNum>\n'
+            new_docs += '\t\t<quoteServerTime>'+str(random.randint(0,5)) + ' ms'+'</timestamp>\n'
+            new_docs += '\t</'+doc['type']+'>\n'
+            continue
+        elif doc['type'] == 'debugEvent':
+            new_docs += '\t\t<server>transactionserver</server>\n'
+            
         
         # go through the keys and add them to the xml
         for key in doc:
@@ -367,7 +378,7 @@ def dumplogXML(username = None):
                 else: 
                     value = int(doc[key]) * 1000
                 new_docs += '\t\t<timestamp>'+str(value)+'</timestamp>\n'
-            elif key != 'type' and key != '_id' and key != 'transactionId' and key != 'userid':
+            elif key != 'type' and key != '_id' and key != 'transactionId' and key != 'userid' and (doc['type'] != 'debugEvent' or key != 'price'):
                 new_docs += '\t\t<'+key+'>'+str(doc[key])+'</'+key+'>\n'
         new_docs += '\t</'+doc['type']+'>\n'
     new_docs += '</log>'
