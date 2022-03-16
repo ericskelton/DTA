@@ -343,7 +343,7 @@ def dumplogXML(username = None):
         if not doc.get('transactionNum', False):
             new_docs += '\t\t<transactionNum>'+str(int(ObjectId(doc['_id']).binary.hex(), 16))[15:]+'</transactionNum>\n'
         else:
-            new_docs += '\t\t<transactionNum>'+str(int(hex(int(doc['transactionNum'])), 16))[15:]+'</transactionNum>\n'
+            new_docs += '\t\t<transactionNum>'+doc['transactionNum'][15:]+'</transactionNum>\n'
         # go through the keys and add them to the xml
         for key in doc:
             if key == 'funds':
