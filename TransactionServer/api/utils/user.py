@@ -14,7 +14,7 @@ def getBalance(username):
     return dbCallWrapper({'username': username}, {'balance': 1}, func = db.user.find_one, eventLog = False)
 
 def addBalance(user, amount, transactionId):
-    return dbCallWrapper({"username": user['username']}, {'$inc': {'balance': float(amount)}}, func = db.user.update_one, eventLog = {'type': 'accountTransaction', 'username': str(user['username']), 'timestamp': int(time.time()*1000), 'action': 'ADD', 'amount': amount, 'transactionNum': transactionId, 'funds': user['balance'] + float(amount), 'server': 'transactionserver'})
+    return dbCallWrapper({"username": user['username']}, {'$inc': {'balance': float(amount)}}, func = db.user.update_one, eventLog = {'type': 'accountTransaction', 'username': str(user['username']), 'timestamp': int(time.time()*1000), 'action': 'ADD', 'transactionNum': transactionId, 'funds': user['balance'] + float(amount), 'server': 'transactionserver'})
 
 
 def subBalance(username, amount):
