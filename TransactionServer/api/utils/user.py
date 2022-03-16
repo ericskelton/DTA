@@ -14,7 +14,7 @@ def getBalance(username):
     return dbCallWrapper({'username': username}, {'balance': 1}, func = db.user.find_one, eventLog = False)
 
 def addBalance(user, amount, transactionId):
-    return dbCallWrapper({"username": user['username']}, {'$inc': {'balance': float(amount)}}, func = db.user.update_one, eventLog = {'type': 'AccountTransaction', 'username': str(username), 'timestamp': int(time.time()*1000), 'action': 'ADD', 'amount': amount, 'transactionNum': transactionId, 'funds': user['balance'] + amount, 'server': 'transactionserver'})
+    return dbCallWrapper({"username": user['username']}, {'$inc': {'balance': float(amount)}}, func = db.user.update_one, eventLog = {'type': 'accountTransaction', 'username': str(username), 'timestamp': int(time.time()*1000), 'action': 'ADD', 'amount': amount, 'transactionNum': transactionId, 'funds': user['balance'] + amount, 'server': 'transactionserver'})
 
 
 def subBalance(username, amount):
@@ -84,7 +84,7 @@ def buyStock(user, amount, quote, transactionId):
                     'cryptographicKey': cryptographicKey
                 }
             }
-        }, func = db.user.update_one, eventLog = {'type': 'AccountTransaction', 'username': str(user['username']), 'timestamp': timestamp, 'action': 'BUY', 'transactionNum': transactionId,'server':'transactionserver', 'funds': user['balance']})
+        }, func = db.user.update_one, eventLog = {'type': 'accountTransaction', 'username': str(user['username']), 'timestamp': timestamp, 'action': 'BUY', 'transactionNum': transactionId,'server':'transactionserver', 'funds': user['balance']})
         return {
             'stock': stock,
             'amount': amount,
@@ -118,7 +118,7 @@ def commitBuy(user, transactionId):
                         'transactions': transaction
                     },
                     '$set': {'pending_buy': None}
-                }, func = db.user.update_one, eventLog = {'type': 'AccountTransaction', 'username': str(user['username']), 'timestamp': int(time.time()*1000), 'action': 'COMMIT_BUY', 'funds': user['balance'] - transaction['price'],  'transactionNum': transactionId, 'server': 'transactionserver'})
+                }, func = db.user.update_one, eventLog = {'type': 'accountTransaction', 'username': str(user['username']), 'timestamp': int(time.time()*1000), 'action': 'COMMIT_BUY', 'funds': user['balance'] - transaction['price'],  'transactionNum': transactionId, 'server': 'transactionserver'})
                 
             else:
                 dbCallWrapper( {'username': user['username']}, {
@@ -140,7 +140,7 @@ def commitBuy(user, transactionId):
                     '$inc': {
                         'balance': -transaction['amount'] * transaction['price']
                     }
-                }, func = db.user.update_one, eventLog = {'type': 'AccountTransaction', 'username': str(user['username']), 'timestamp': int(time.time()*1000), 'action': 'COMMIT_BUY', 'funds': user['balance'] - transaction['price'],  'transactionNum': transactionId, 'server': 'transactionserver'})
+                }, func = db.user.update_one, eventLog = {'type': 'accountTransaction', 'username': str(user['username']), 'timestamp': int(time.time()*1000), 'action': 'COMMIT_BUY', 'funds': user['balance'] - transaction['price'],  'transactionNum': transactionId, 'server': 'transactionserver'})
             
             
             
@@ -172,7 +172,7 @@ def sellStock(user, amount, quote, transactionId):
                 }
             }, 
             func = db.user.update_one,
-            eventLog = {'type': 'AccountTransaction', 'username': str(user['username']), 'timestamp': int(time.time()*1000), 'action': 'SELL', 'funds': user['balance'],  'transactionNum': transactionId, 'server': 'transactionserver'}
+            eventLog = {'type': 'accountTransaction', 'username': str(user['username']), 'timestamp': int(time.time()*1000), 'action': 'SELL', 'funds': user['balance'],  'transactionNum': transactionId, 'server': 'transactionserver'}
         )
         return True
     raise Exception('Insufficient stock')

@@ -3,7 +3,7 @@ from api.utils.db import *
 import time
 import random
 db, client = getDb()
-def getQuote(ticker, user, transactionId):
+def getQuote(ticker, user, request):
     #try:
     #    HOST = '192.168.4.2'
     #    PORT = 4444
@@ -68,7 +68,9 @@ def getQuote(ticker, user, transactionId):
                 'timestamp': current_time,
                 'server': 'transactionserver',
                 'type': 'debugEvent',
-                'debugMessage': 'Quote Server Cache Hit for ' + ticker
+                'debugMessage': 'Quote Server Cache Hit for ' + ticker,
+                'command': 'QUOTE',
+                'stockSymbol': ticker,
             })
         return {
             'ticker': ticker,
