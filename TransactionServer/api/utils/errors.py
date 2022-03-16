@@ -72,7 +72,7 @@ def handleViewError(exception, request, user):
         'InvalidUser': status.HTTP_400_BAD_REQUEST,
         'InvalidUserStatus': status.HTTP_400_BAD_REQUEST,
     }
-    raise exception
+    # raise exception
     return Response(
         {'error': exception.args[0]},
         status= statuses[exception.args[0]] if exception.args[0] in statuses else status.HTTP_400_BAD_REQUEST
