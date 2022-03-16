@@ -248,7 +248,7 @@ def setBuyAmount(user, stock, amount, transactionId):
         '$set': {
             'pending_trigger': {
                 'stock': stock,
-                'amount': amount,
+                'amount': float(amount),
                 'type': 'buy'
             }
         }
@@ -261,7 +261,7 @@ def setSellAmount(user, stock, amount, transactionId):
         '$set': {
             'pending_trigger': {
                 'stock': stock,
-                'amount': amount,
+                'amount': float(amount),
                 'type': 'sell'
                 }
         }
@@ -269,13 +269,13 @@ def setSellAmount(user, stock, amount, transactionId):
 
 def setBuyTrigger(user, stock, price, transactionId):
     if(user['pending_trigger']['stock'] == stock and user['pending_trigger']['type'] == 'buy'):
-        if user['balance'] < price * user['pending_trigger']['amount']:
+        if user['balance'] < price * float(user['pending_trigger']['amount']):
             raise Exception('Insufficient funds to buy at that price')
         return dbCallWrapper({'username': user['username']}, {
             '$set': {
                 'pending_trigger': None,
                 'buy_triggers'+'.'+stock: {
-                    'amount': user['pending_trigger']['amount'],
+                    'amount': float(user['pending_trigger']['amount']),
                     'price': price,
                     'userid': user['username'],
                     'type': 'buy'
@@ -296,7 +296,7 @@ def setSellTrigger(user, stock, price, transactionId):
                     'pending_trigger': None,
                     'sell_triggers': {
                         stock: {
-                            'amount': user['pending_trigger']['amount'],
+                            'amount': float(user['pending_trigger']['amount']),
                             'price': price,
                             'userid': user['username'],
                             'type': 'sell'
