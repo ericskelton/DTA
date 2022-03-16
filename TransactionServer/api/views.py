@@ -52,13 +52,14 @@ def buy(request):
     user = getUser(username)
     ticker = request.data.get('ticker', False)
     amount = request.data.get('amount', False)
+    print(ticker, amount, username)
     try: 
         if ticker == False: 
             raise Exception('No ticker specified')
         if amount == False:
             raise Exception('No amount specified')
     
-        return Response(buyStock(user, amount,getQuote(ticker,username, request.transactionId), request.transactionId))
+        return Response(buyStock(user, amount,getQuote(ticker,user, request.transactionId), request.transactionId))
     except Exception as e:
         return handleViewError(e, request, user)
 
@@ -95,7 +96,7 @@ def sell(request):
     ticker = request.data.get('ticker', False)
     user = getUser(username)
     try:
-        return Response(sellStock(user, amount, getQuote(ticker, username, request.transactionId), request.transactionId))
+        return Response(sellStock(user, amount, getQuote(ticker, user, request.transactionId), request.transactionId))
     except Exception as e:
         return handleViewError(e, request, user)
 @csrf_exempt

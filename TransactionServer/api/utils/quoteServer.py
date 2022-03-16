@@ -49,7 +49,7 @@ def getQuote(ticker, user, request):
         randomFloat = quote if quote else randomFloat
         fetchType = 'quoteServer' if not quote else 'quote_cache'
         if fetchType == 'quoteServer':
-
+            print(user)
             logJsonObject({
                 # QUOTE SERVER LOG 
                 'stockSymbol': ticker,

@@ -35,18 +35,21 @@ def logRequest(view):
         	'command': command.upper(),
         	'server': 'transactionserver',
         }
+        print(request.POST)
         if request.method == 'POST' :
 
-            allParams = dict(request.data)
-            allParams.update(request.POST.dict())
+            allParams = request.POST.dict()
+            request.data = allParams
         else:
             allParams = request.GET.dict()
+        print(allParams)
+        
         json['username'] = allParams['username'] if 'username' in allParams.keys() else 'admin' 
         if 'ticker' in allParams.keys():
             json['stockSymbol'] = allParams['ticker']
         objId = dbCallWrapper(json, func = db.log.insert_one)
         request.transactionId = str(int(ObjectId(objId).binary.hex(), 16)) # cast to int
-        print(request.transactionId, type(request.transactionId))
+        
         return view(request, **kwargs)
         
     return wrapper

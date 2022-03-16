@@ -14,7 +14,7 @@ def getBalance(username):
     return dbCallWrapper({'username': username}, {'balance': 1}, func = db.user.find_one, eventLog = False)
 
 def addBalance(user, amount, transactionId):
-    return dbCallWrapper({"username": user['username']}, {'$inc': {'balance': float(amount)}}, func = db.user.update_one, eventLog = {'type': 'accountTransaction', 'username': str(username), 'timestamp': int(time.time()*1000), 'action': 'ADD', 'amount': amount, 'transactionNum': transactionId, 'funds': user['balance'] + amount, 'server': 'transactionserver'})
+    return dbCallWrapper({"username": user['username']}, {'$inc': {'balance': float(amount)}}, func = db.user.update_one, eventLog = {'type': 'accountTransaction', 'username': str(user['username']), 'timestamp': int(time.time()*1000), 'action': 'ADD', 'amount': amount, 'transactionNum': transactionId, 'funds': user['balance'] + float(amount), 'server': 'transactionserver'})
 
 
 def subBalance(username, amount):
@@ -164,7 +164,7 @@ def sellStock(user, amount, quote, transactionId):
                 '$set': {
                     'pending_sell': {
                         'stock': stock, 
-                        'amount': amount,
+                        'amount': int(amount),
                         'price': price, 
                         'timestamp': timestamp, 
                         'cryptographicKey': cryptographicKey
@@ -189,10 +189,10 @@ def commitSell(user, transactionId):
             totalAmount = user['stocks'][transaction['stock']]['amount']
 
             if(totalAmount == transaction['amount']):
+                print('selling all')
                 dbCallWrapper(
                     {'username': user['username']}, {
                         '$inc': {
-                            'stocks.' + transaction['stock'] + '.amount': -transaction['amount'],
                             'balance': transaction['amount'] * transaction['price']
                         },
                         '$push':{
@@ -210,7 +210,7 @@ def commitSell(user, transactionId):
 
                 dbCallWrapper({'username': user['username']}, {
                     '$inc': {
-                        'stocks.' + transaction['stock'] + '.amount': -transaction['amount'],
+                        'stocks.' + transaction['stock'] + '.amount': -int(transaction['amount']),
                         'balance': transaction['amount'] * transaction['price']
                     },
                     '$push':{
