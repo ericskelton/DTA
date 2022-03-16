@@ -346,7 +346,7 @@ def dumplogXML(username = None):
             new_docs += '\t\t<transactionNum>'+str(int(hex(int(doc['transactionNum']))[6:], 16))+'</transactionNum>\n'
         # go through the keys and add them to the xml
         for key in doc:
-            if key != 'type' and key != '_id':
+            if key != 'type' and key != '_id' and key != 'transactionNum':
                 new_docs += '\t\t<'+key+'>'+str(doc[key])+'</'+key+'>\n'
         new_docs += '\t</'+doc['type']+'>\n'
     new_docs += '</log>'
