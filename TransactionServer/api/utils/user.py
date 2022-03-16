@@ -105,7 +105,7 @@ def commitBuy(user, transactionId):
             raise Exception('Quote expired')
         else:
             # buy the stock
-            if(transaction['stock'] in user['stocks']):
+            if(transaction['stock'] in user['stocks'] and user['stocks'][transaction['stock']]):
                 dbCallWrapper( {'username': user['username']}, {
                     '$inc': {
                         'stocks.' + transaction['stock'] + '.amount': transaction['amount'],
