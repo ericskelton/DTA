@@ -269,14 +269,14 @@ def setSellAmount(user, stock, amount, transactionId):
 
 def setBuyTrigger(user, stock, price, transactionId):
     if(user['pending_trigger']['stock'] == stock and user['pending_trigger']['type'] == 'buy'):
-        if user['balance'] < price * float(user['pending_trigger']['amount']):
+        if user['balance'] < float(price) * float(user['pending_trigger']['amount']):
             raise Exception('Insufficient funds to buy at that price')
         return dbCallWrapper({'username': user['username']}, {
             '$set': {
                 'pending_trigger': None,
                 'buy_triggers'+'.'+stock: {
                     'amount': float(user['pending_trigger']['amount']),
-                    'price': price,
+                    'price': float(price),
                     'userid': user['username'],
                     'type': 'buy'
                 }
@@ -341,11 +341,13 @@ def dumplogXML(username = None):
         
             
         if not doc.get('transactionNum', False):
-            new_docs += '\t\t<transactionNum>'+str(int(ObjectId(doc['_id']).binary.hex()[6:], 16))+'</transactionNum>\n'
+            new_docs += '\t\t<transactionNum>'+str(int(ObjectId(doc['_id']).binary.hex(), 16))[15:]+'</transactionNum>\n'
         else:
-            new_docs += '\t\t<transactionNum>'+str(int(hex(int(doc['transactionNum']))[6:], 16))+'</transactionNum>\n'
+            new_docs += '\t\t<transactionNum>'+str(int(hex(int(doc['transactionNum'])), 16))[15:]+'</transactionNum>\n'
         # go through the keys and add them to the xml
         for key in doc:
+            if key == 'funds':
+                doc[key] = round(doc[key], 2)
             if key != 'type' and key != '_id' and key != 'transactionNum':
                 new_docs += '\t\t<'+key+'>'+str(doc[key])+'</'+key+'>\n'
         new_docs += '\t</'+doc['type']+'>\n'
