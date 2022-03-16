@@ -52,7 +52,7 @@ def buy(request):
     user = getUser(username)
     ticker = request.data.get('ticker', False)
     amount = request.data.get('amount', False)
-    print(ticker, amount, username)
+    # print(ticker, amount, username)
     try: 
         if ticker == False: 
             raise Exception('No ticker specified')
