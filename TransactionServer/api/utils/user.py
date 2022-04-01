@@ -26,7 +26,9 @@ def getTransactions(username):
 def getAllTransactions():
     return dbCallWrapper({}, {'transactions': 1}, func = db.user.find, eventLog = False)
 
-def getUser(username):
+def getUser(username, fields = {}):
+    if(fields):
+        return dbCallWrapper({'username': username}, fields, func = db.user.find_one, eventLog = False)
     return dbCallWrapper({"username": username}, func = db.user.find_one, eventLog = False)
 
 def addTransaction(username, transaction):
@@ -289,7 +291,7 @@ def setBuyTrigger(user, stock, price, transactionId):
 def setSellTrigger(user, stock, price, transactionId):
 
     if(user['pending_trigger']['stock'] == stock and user['pending_trigger']['type'] == 'sell'):
-        stock = user['stock'].get(stock, None)
+        stock = user['stocks'].get(stock, None)
         if(stock):
             return dbCallWrapper({'username': user['username']}, {
                 '$set': {

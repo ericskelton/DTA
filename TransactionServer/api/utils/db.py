@@ -88,3 +88,9 @@ def dbCallWrapper(*args, **kwargs):
     else:
         return False
 
+def mongoZip(fields):
+    """
+    takes a list of fields and zips them into a dict with field name as key and 1 as value
+    """
+    return dict(zip(fields, [1]*len(fields)))
+
